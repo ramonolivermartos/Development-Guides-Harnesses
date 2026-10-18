@@ -1,0 +1,2546 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guía interactiva — OpenCode + Git + Codex + Claude + Gemini</title>
+<style>
+:root {
+  --bg:#0b0d10; --panel:#11151a; --panel2:#161b22; --text:#e7edf3; --muted:#9aa7b4;
+  --line:#27313c; --accent:#65b8ff; --ok:#62d394; --warn:#f4c15d; --bad:#ff7b72;
+  --code:#090b0e; --shadow:0 14px 36px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 Inter,Segoe UI,system-ui,sans-serif}
+a{color:var(--accent)}
+header{position:sticky;top:0;z-index:20;background:rgba(11,13,16,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top{max-width:1180px;margin:auto;padding:12px 22px;display:flex;gap:16px;align-items:center}
+.brand{font-weight:800;white-space:nowrap}
+.progress-wrap{flex:1;height:10px;background:#202731;border-radius:999px;overflow:hidden}
+.progress{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--ok));transition:.25s}
+#progressText{font-variant-numeric:tabular-nums;color:var(--muted);min-width:72px;text-align:right}
+button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:8px;padding:8px 11px;cursor:pointer}
+button:hover{border-color:#4b5c6e}
+main{max-width:1180px;margin:auto;padding:30px 22px 70px}
+.hero{padding:26px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,#111820,#0f1318);box-shadow:var(--shadow)}
+h1{font-size:clamp(28px,4vw,46px);line-height:1.05;margin:0 0 12px}
+h2{margin:0;font-size:23px}
+h3{margin:22px 0 8px;font-size:17px}
+p{margin:8px 0}
+.muted{color:var(--muted)}
+.badge{display:inline-block;padding:4px 9px;border-radius:999px;background:#182531;border:1px solid #284660;color:#9ed1ff;font-size:12px;font-weight:700;margin-right:7px}
+.callout{margin:16px 0;padding:14px 16px;border-left:4px solid var(--accent);background:#101820;border-radius:0 10px 10px 0}
+.callout.warn{border-color:var(--warn);background:#1a1710}
+.callout.ok{border-color:var(--ok);background:#101a15}
+.callout.bad{border-color:var(--bad);background:#1d1111}
+.assumptions{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:18px}
+.assumption{padding:11px 13px;background:var(--panel2);border:1px solid var(--line);border-radius:10px}
+nav.toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:24px 0}
+nav.toc a{text-decoration:none;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text)}
+nav.toc a:hover{border-color:var(--accent)}
+.section{margin:22px 0;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 18px;background:#121820;border-bottom:1px solid var(--line)}
+.section-body{padding:18px}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(220px,.65fr);gap:10px;padding:12px 0;border-bottom:1px dashed #242d37}
+.step:last-child{border-bottom:0}
+.step input[type=checkbox]{width:18px;height:18px;margin-top:3px;accent-color:var(--ok)}
+.step-main strong{display:block;margin-bottom:3px}
+.note{color:var(--muted);font-size:13px;border-left:2px solid #334250;padding-left:10px}
+.codebox{position:relative;margin:10px 0 16px;background:var(--code);border:1px solid #242d37;border-radius:10px;overflow:hidden}
+.codehead{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#11161c;border-bottom:1px solid #242d37;color:var(--muted);font-size:12px}
+pre{margin:0;padding:14px;overflow:auto;white-space:pre;tab-size:2}
+.codebox.long pre{max-height:520px;overflow:auto}
+code{font:13px/1.5 Consolas,"Cascadia Code",monospace}
+.copy{font-size:12px;padding:5px 8px}
+.path{font-family:Consolas,"Cascadia Code",monospace;color:#b6dcff}
+.tree{white-space:pre-wrap}
+.role-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:14px 0}
+.role{padding:15px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.role b{display:block;font-size:17px;margin-bottom:4px}
+.modelbox{display:grid;grid-template-columns:160px 1fr;gap:8px 12px;align-items:center;max-width:760px;margin:14px 0}
+.modelbox input{width:100%;padding:9px 10px;background:#0b0f13;color:var(--text);border:1px solid var(--line);border-radius:8px;font-family:Consolas,monospace}
+.flow{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:16px 0}
+.node{padding:9px 11px;border:1px solid var(--line);background:var(--panel2);border-radius:8px}
+.arrow{color:var(--muted);font-size:20px}
+table{width:100%;border-collapse:collapse;margin:12px 0}
+th,td{border:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{background:#141b22}
+.small{font-size:13px}
+.footer{margin-top:34px;color:var(--muted);font-size:13px}
+@media(max-width:800px){
+  .step{grid-template-columns:28px 1fr}
+  .note{grid-column:2}
+  .top{flex-wrap:wrap}
+  .progress-wrap{order:3;flex-basis:100%}
+  .modelbox{grid-template-columns:1fr}
+}
+@media print{
+  header,button{display:none!important}
+  body{background:white;color:black}
+  .section,.hero{box-shadow:none;border-color:#bbb}
+  .section{break-inside:avoid}
+  .note,.muted{color:#444}
+  pre{white-space:pre-wrap}
+}
+</style>
+</head>
+<body>
+<header>
+<div class="top">
+  <div class="brand">OpenCode × Git</div>
+  <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+  <div id="progressText">0 / 0</div>
+  <button id="reset">Reiniciar checklist</button>
+</div>
+</header>
+
+<main>
+<section class="hero">
+  <span class="badge">OpenCode V2</span><span class="badge">Git normal</span><span class="badge">Windows / PowerShell</span>
+  <h1>Guía interactiva: Codex implementa, Claude revisa, Gemini documenta</h1>
+  <p class="muted">La interfaz y las explicaciones están en español. Los archivos que realmente vivirán dentro del proyecto están en inglés.</p>
+
+  <div class="assumptions">
+    <div class="assumption"><strong>✓ Proyecto ya creado</strong><br><span class="muted">No inicializamos Spring Boot ni la estructura base.</span></div>
+    <div class="assumption"><strong>✓ Git ya iniciado</strong><br><span class="muted">Existe <span class="path">.git/</span>.</span></div>
+    <div class="assumption"><strong>✓ .gitignore correcto</strong><br><span class="muted">No lo recreamos.</span></div>
+    <div class="assumption"><strong>✓ Primer commit hecho</strong><br><span class="muted">Partimos de una base conocida.</span></div>
+  </div>
+
+  <div class="callout ok"><strong>Separación fundamental:</strong> Claude revisa el <em>candidato a commit</em> mediante <span class="path">git diff --cached</span>. Gemini no usa ese diff para la bitácora: recibe un <strong>diff S0 → S1 de cada intervalo de 30 minutos</strong> creado por un monitor externo no destructivo.</div>
+</section>
+
+<nav class="toc">
+  <a href="#s0">0 · Modelo mental</a>
+  <a href="#s1">1 · Comprobar proyecto</a>
+  <a href="#s2">2 · Crear estructura</a>
+  <a href="#s3">3 · Conectar modelos</a>
+  <a href="#s4">4 · AGENTS.md real</a>
+  <a href="#s5">5 · OpenCode global</a>
+  <a href="#s6">6 · Codex</a>
+  <a href="#s7">7 · Claude</a>
+  <a href="#s8">8 · Gemini</a>
+  <a href="#s9">9 · Comandos OpenCode</a>
+  <a href="#s10">10 · Especificación de logs</a>
+  <a href="#s11">11 · Monitor PowerShell</a>
+  <a href="#s12">12 · Verificación inicial</a>
+  <a href="#s13">13 · Flujo diario</a>
+  <a href="#s14">14 · Bucle de corrección</a>
+  <a href="#s15">15 · Commit</a>
+  <a href="#s16">16 · Chuleta</a>
+</nav>
+
+<section class="section" id="s0">
+<div class="section-head"><h2>0. Modelo mental</h2></div>
+<div class="section-body">
+  <div class="role-grid">
+    <div class="role"><b>Codex / OpenAI</b>Implementa código y tests siguiendo el AGENTS.md del repositorio.</div>
+    <div class="role"><b>Claude</b>Revisor independiente. Lee <span class="path">git diff --cached</span> y no edita.</div>
+    <div class="role"><b>Gemini</b>Documenter. Genera la bitácora desde el diff inmutable de cada intervalo.</div>
+    <div class="role"><b>Tú</b>Controlas Git, aceptas o rechazas revisiones y decides qué se entrega.</div>
+  </div>
+
+  <div class="flow">
+    <span class="node">Tarea</span><span class="arrow">→</span>
+    <span class="node">Codex</span><span class="arrow">→</span>
+    <span class="node">Tu inspección</span><span class="arrow">→</span>
+    <span class="node">git add</span><span class="arrow">→</span>
+    <span class="node">Claude</span><span class="arrow">→</span>
+    <span class="node">Commit humano</span>
+  </div>
+
+  <div class="flow">
+    <span class="node">S0</span><span class="arrow">→</span>
+    <span class="node">30 min de trabajo</span><span class="arrow">→</span>
+    <span class="node">S1</span><span class="arrow">→</span>
+    <span class="node">diff S0→S1</span><span class="arrow">→</span>
+    <span class="node">Gemini en background</span><span class="arrow">→</span>
+    <span class="node">development log</span>
+  </div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Distingo revisión de código y bitácora de desarrollo.</strong>Son dos mecanismos diferentes y deliberadamente usan diffs diferentes.</div><div class="note">Claude responde a “¿qué voy a commitear?”. Gemini responde a “¿qué cambió durante este intervalo?”.</div></div>
+</div>
+</section>
+
+<section class="section" id="s1">
+<div class="section-head"><h2>1. Sitúate en la raíz y comprueba el estado inicial</h2></div>
+<div class="section-body">
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git rev-parse --show-toplevel
+git status
+git branch --show-current
+git log --oneline -5</code></pre></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Estoy en la raíz real del repositorio.</strong></div><div class="note">Todo lo que crearemos se sitúa respecto a esta carpeta.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Veo el primer commit y conozco la rama actual.</strong></div><div class="note">No mezcles la instalación del sistema de agentes con trabajo previo que no entiendes.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>No hay cambios inesperados en <span class="path">git status</span>.</strong></div><div class="note">Si los hay, resuélvelos o sepáralos antes.</div></div>
+</div>
+</section>
+
+<section class="section" id="s2">
+<div class="section-head"><h2>2. Crear la estructura de control desde la raíz</h2></div>
+<div class="section-body">
+  <div class="codebox"><div class="codehead">PowerShell — directorios <button class="copy">Copiar</button></div><pre><code>New-Item -ItemType Directory -Force ".opencode\agents" | Out-Null
+New-Item -ItemType Directory -Force ".opencode\commands" | Out-Null
+New-Item -ItemType Directory -Force "docs\development-logs" | Out-Null
+New-Item -ItemType Directory -Force "tools\opencode" | Out-Null</code></pre></div>
+
+  <div class="codebox"><div class="codehead">PowerShell — archivos <button class="copy">Copiar</button></div><pre><code>@(
+  "AGENTS.md",
+  "opencode.jsonc",
+  ".opencode\agents\implementer.md",
+  ".opencode\agents\reviewer.md",
+  ".opencode\agents\documenter.md",
+  ".opencode\commands\implement.md",
+  ".opencode\commands\review.md",
+  ".opencode\commands\update-docs.md",
+  ".opencode\commands\document-interval.md",
+  "docs\development-logs\README.md",
+  "tools\opencode\dev-log-monitor.ps1"
+) | ForEach-Object { New-Item -ItemType File -Force $_ | Out-Null }</code></pre></div>
+
+  <h3>Estructura objetivo</h3>
+  <div class="codebox"><div class="codehead">Árbol del proyecto</div><pre class="tree"><code>PROJECT/
+├── .git/
+├── .gitignore
+├── .opencode/
+│   ├── agents/
+│   │   ├── implementer.md
+│   │   ├── reviewer.md
+│   │   └── documenter.md
+│   └── commands/
+│       ├── implement.md
+│       ├── review.md
+│       ├── update-docs.md
+│       └── document-interval.md
+├── docs/
+│   └── development-logs/
+│       ├── README.md
+│       └── YYYY-MM-DD/
+│           └── HH-mm--HH-mm.md
+├── tools/
+│   └── opencode/
+│       └── dev-log-monitor.ps1
+├── AGENTS.md
+├── opencode.jsonc
+├── README.md
+└── ...normal project structure...</code></pre></div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He creado todas las rutas exactamente desde la raíz.</strong></div><div class="note">Los nombres de los agentes y comandos están en inglés porque forman parte del proyecto.</div></div>
+</div>
+</section>
+
+<section class="section" id="s3">
+<div class="section-head"><h2>3. Conectar proveedores y copiar IDs reales</h2></div>
+<div class="section-body">
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>opencode</code></pre></div>
+  <div class="codebox"><div class="codehead">OpenCode TUI <button class="copy">Copiar</button></div><pre><code>/connect
+/models</code></pre></div>
+
+  <div class="callout"><strong>No inventes los IDs de los modelos.</strong> Usa exactamente los que OpenCode te enseñe.</div>
+
+  <div class="modelbox">
+    <label><strong>Codex / OpenAI</strong></label><input data-model-input="codex" value="openai/REPLACE_WITH_REAL_ID">
+    <label><strong>Claude</strong></label><input data-model-input="claude" value="anthropic/REPLACE_WITH_REAL_ID">
+    <label><strong>Gemini</strong></label><input data-model-input="gemini" value="google/REPLACE_WITH_REAL_ID">
+  </div>
+  <p class="muted small">Los bloques de agente se actualizan automáticamente al escribir aquí.</p>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Tengo los tres IDs reales.</strong></div><div class="note">El proveedor/modelo disponible puede cambiar; por eso no se fija uno inventado en la guía.</div></div>
+</div>
+</section>
+
+<section class="section" id="s4">
+<div class="section-head"><h2>4. Usar tu <span class="path">AGENTS.md</span> real</h2></div>
+<div class="section-body">
+  <p>Ubicación: <span class="path">PROJECT/AGENTS.md</span>.</p>
+  <div class="callout ok"><strong>Este bloque es el AGENTS.md que me pasaste.</strong> Sustituye por completo al AGENTS.md simplificado de la primera versión de la guía.</div>
+  <div class="codebox long"><div class="codehead">AGENTS.md — contenido del proyecto <button class="copy">Copiar</button></div><pre><code># **AGENTS.md**
+
+## **Scope**
+
+These instructions apply to the entire repository unless a nested `AGENTS.md` overrides them for a specific directory.
+
+This repository is a Spring Boot backend application.
+
+The agent must preserve the existing architecture, conventions, public contracts, and behavior unless the task explicitly requires changing them.
+
+## **Core Rules**
+
+1. Inspect before modifying.  
+2. Make the smallest change that fully solves the task.  
+3. Follow existing project conventions over generic best practices.  
+4. Do not redesign unrelated code.  
+5. Do not introduce dependencies unless necessary.  
+6. Do not change public API contracts unless explicitly requested.  
+7. Do not modify database schema casually.  
+8. Do not suppress failures instead of fixing their cause.  
+9. Never claim a change works without validating it.  
+10. Keep the repository buildable.
+
+## **Before Making Changes**
+
+Before editing code, inspect the relevant parts of the repository.
+
+At minimum, check:
+
+* `pom.xml` or `build.gradle`  
+* `src/main/java`  
+* `src/main/resources`  
+* `src/test/java`
+
+For the affected feature, identify:
+
+* Controller  
+* Service  
+* Repository  
+* Entity  
+* DTOs  
+* Mapper  
+* Exceptions  
+* Tests  
+* Configuration
+
+Search for existing implementations of similar behavior before creating new abstractions.
+
+Prefer reuse over duplication.
+
+Do not assume:
+
+* Java version  
+* Spring Boot version  
+* database engine  
+* Lombok availability  
+* MapStruct availability  
+* Spring Security configuration  
+* testing libraries  
+* naming conventions  
+* package structure
+
+Determine them from the repository.
+
+## **Build System**
+
+Use the build system already present in the project.
+
+For Maven:
+
+./mvnw test
+
+On Windows:
+
+mvnw.cmd test
+
+If no wrapper exists:
+
+mvn test
+
+For Gradle:
+
+./gradlew test
+
+Do not migrate Maven to Gradle or Gradle to Maven unless explicitly requested.
+
+## **Architecture**
+
+Preserve the existing application architecture.
+
+Typical Spring Boot flow:
+
+Controller  
+    ↓  
+Service  
+    ↓  
+Repository  
+    ↓  
+Database
+
+If DTOs and mappers exist:
+
+HTTP  
+ ↓  
+Request DTO  
+ ↓  
+Controller  
+ ↓  
+Service  
+ ↓  
+Repository  
+ ↓  
+Entity  
+ ↓  
+Response DTO
+
+Do not bypass layers without a good reason.
+
+Examples of prohibited shortcuts:
+
+Controller → Repository  
+Controller → EntityManager  
+Controller → database query  
+DTO → Repository  
+Entity → Service
+
+unless the existing architecture intentionally uses that pattern.
+
+## **Controllers**
+
+Controllers handle HTTP concerns.
+
+Controllers may:
+
+* receive parameters  
+* receive request bodies  
+* validate request DTOs  
+* call services  
+* return response DTOs  
+* select HTTP status codes
+
+Controllers should not contain business logic.
+
+Prefer constructor injection.
+
+@RestController  
+@RequestMapping("/api/locals")  
+public class LocalController {
+
+    private final LocalService localService;
+
+    public LocalController(LocalService localService) {  
+        this.localService \= localService;  
+    }  
+}
+
+Do not introduce field injection.
+
+Avoid:
+
+@Autowired  
+private LocalService localService;
+
+unless the existing project consistently uses field injection and changing it is outside task scope.
+
+## **Services**
+
+Business logic belongs in services.
+
+Services are responsible for:
+
+* business rules  
+* orchestration  
+* persistence coordination  
+* transactional operations  
+* state transitions  
+* domain validation  
+* resource existence checks
+
+Prefer constructor injection.
+
+Keep service methods cohesive.
+
+Do not create large service methods when existing logic can be decomposed clearly.
+
+Do not split simple logic into unnecessary abstractions.
+
+## **Repositories**
+
+Repositories handle persistence.
+
+Prefer existing Spring Data repository patterns.
+
+public interface LocalRepository extends JpaRepository\&lt;Local, Long\&gt; {  
+}
+
+For simple queries, prefer derived query methods:
+
+Optional\&lt;User\&gt; findByEmail(String email);
+
+boolean existsByCode(String code);
+
+Use JPQL or native SQL only when necessary.
+
+Before creating a custom query, check whether:
+
+* a derived query already exists  
+* an equivalent repository method exists  
+* JPA can express the operation cleanly
+
+Never add business logic to repositories.
+
+## **Entities**
+
+Treat entities as persistence models.
+
+When modifying entities:
+
+* preserve table mappings  
+* preserve relationship ownership  
+* consider fetch strategy  
+* consider cascade behavior  
+* consider nullability  
+* consider database constraints  
+* consider serialization recursion  
+* consider equality semantics
+
+Do not change mappings such as:
+
+@Entity  
+@Table  
+@Column  
+@JoinColumn  
+@OneToMany  
+@ManyToOne  
+@OneToOne  
+@ManyToMany
+
+without understanding the database impact.
+
+Never casually change relationship cascade settings.
+
+Especially avoid introducing:
+
+CascadeType.ALL
+
+without a clear reason.
+
+## **DTOs**
+
+If DTOs exist, preserve the entity/API boundary.
+
+Do not expose JPA entities directly through controllers if the project already uses DTOs.
+
+Follow existing DTO naming conventions.
+
+Examples:
+
+CreateUserRequest  
+UpdateUserRequest  
+UserResponse
+
+or:
+
+UserDTO
+
+Do not introduce a new DTO naming scheme into an established project.
+
+## **Mapping**
+
+Use the mapping strategy already present.
+
+If the project uses:
+
+* MapStruct  
+* manual mapper classes  
+* static factory methods  
+* service-level mapping
+
+continue using that approach.
+
+Do not add MapStruct merely to eliminate small manual mappings.
+
+Do not add Lombok merely to reduce boilerplate.
+
+## **Dependency Injection**
+
+Prefer constructor injection.
+
+private final UserRepository userRepository;
+
+public UserService(UserRepository userRepository) {  
+    this.userRepository \= userRepository;  
+}
+
+If Lombok is already used consistently:
+
+@RequiredArgsConstructor  
+@Service  
+public class UserService {
+
+    private final UserRepository userRepository;  
+}
+
+is acceptable.
+
+Never introduce Lombok without checking `pom.xml` or `build.gradle`.
+
+## **Validation**
+
+Use Jakarta Bean Validation when appropriate.
+
+Typical annotations:
+
+@NotNull  
+@NotBlank  
+@Size  
+@Email  
+@Min  
+@Max  
+@Positive  
+@Pattern
+
+Controller request bodies should use:
+
+@Valid
+
+when validation annotations are present.
+
+Validation involving persisted state belongs in the service layer.
+
+if (userRepository.existsByEmail(request.email())) {  
+    throw new DuplicateResourceException(...);  
+}
+
+Do not duplicate validation across controller and service without reason.
+
+## **Exceptions**
+
+Use the project's existing exception strategy.
+
+Before adding a new exception, inspect:
+
+* `@RestControllerAdvice`  
+* `@ControllerAdvice`  
+* `@ExceptionHandler`  
+* custom `RuntimeException` classes  
+* error response DTOs
+
+Prefer centralized exception handling.
+
+Do not catch exceptions only to hide them.
+
+Avoid:
+
+try {  
+    ...  
+} catch (Exception e) {  
+    return null;  
+}
+
+Avoid:
+
+catch (Exception e) {  
+    e.printStackTrace();  
+}
+
+Do not convert all exceptions into `500` manually if centralized handling exists.
+
+## **Resource Lookup**
+
+For required resources, prefer:
+
+repository.findById(id)  
+        .orElseThrow(() \-\&gt; new ResourceNotFoundException(...));
+
+Avoid:
+
+repository.findById(id).get();
+
+Do not return `null` for missing resources unless the existing contract explicitly requires it.
+
+## **Transactions**
+
+Use transactions at the service layer.
+
+For write operations requiring atomicity:
+
+@Transactional
+
+For complex reads where appropriate:
+
+@Transactional(readOnly \= true)
+
+Do not add `@Transactional` indiscriminately.
+
+Understand whether JPA dirty checking is being relied upon.
+
+When modifying a managed entity inside a transaction, an explicit:
+
+repository.save(entity);
+
+may not be necessary.
+
+Follow the current project's persistence style unless there is a concrete reason to change it.
+
+## **Update Semantics**
+
+Respect the intended distinction between `PUT` and `PATCH`.
+
+For partial updates, validate each field independently.
+
+Wrong:
+
+if (request.getCode() \!= null) {  
+    entity.setFloor(request.getFloor());  
+}
+
+Correct:
+
+if (request.getFloor() \!= null) {  
+    entity.setFloor(request.getFloor());  
+}
+
+When updating Strings, distinguish between:
+
+* `null`  
+* empty string  
+* blank string  
+* actual value
+
+according to the API contract.
+
+Do not silently invent update semantics.
+
+## **REST Conventions**
+
+Preserve existing routes.
+
+For new REST resources, prefer conventional resource-based routes:
+
+GET    /api/users  
+GET    /api/users/{id}  
+POST   /api/users  
+PUT    /api/users/{id}  
+PATCH  /api/users/{id}  
+DELETE /api/users/{id}
+
+Use appropriate HTTP statuses.
+
+Typical defaults:
+
+GET     → 200  
+POST    → 201  
+PUT     → 200 or 204  
+PATCH   → 200 or 204  
+DELETE  → 204
+
+Errors commonly map to:
+
+400 Bad Request  
+401 Unauthorized  
+403 Forbidden  
+404 Not Found  
+409 Conflict  
+500 Internal Server Error
+
+Do not change existing API semantics merely to make them more theoretically RESTful unless requested.
+
+Backward compatibility has priority.
+
+## **Spring Security**
+
+If Spring Security exists, inspect the current security configuration before modifying endpoints.
+
+Check for:
+
+* `SecurityFilterChain`  
+* `@EnableMethodSecurity`  
+* `@PreAuthorize`  
+* `@Secured`  
+* filters  
+* JWT handling  
+* authentication providers  
+* CORS configuration  
+* CSRF configuration
+
+Do not disable security to make tests pass.
+
+Never solve authorization problems with:
+
+.anyRequest().permitAll()
+
+unless explicitly requested.
+
+Do not expose previously protected endpoints accidentally.
+
+## **Persistence**
+
+Before changing persistence behavior, determine:
+
+* database engine  
+* migration system  
+* schema generation mode  
+* entity relationships  
+* current constraints
+
+Check configuration such as:
+
+spring.jpa.hibernate.ddl-auto  
+spring.datasource.\*
+
+and migration folders such as:
+
+db/migration  
+liquibase  
+flyway
+
+## **Database Migrations**
+
+If Flyway or Liquibase is used, schema changes must follow the existing migration mechanism.
+
+Never modify an already-applied migration unless the repository explicitly treats migrations as disposable.
+
+Prefer creating a new migration.
+
+Example:
+
+V1\_\_initial\_schema.sql  
+V2\_\_add\_user\_status.sql  
+V3\_\_add\_local\_code\_index.sql
+
+Database changes must be backward-aware when possible.
+
+## **Configuration**
+
+Do not hardcode environment-specific values.
+
+Avoid:
+
+String password \= "password123";  
+String url \= "http\://localhost:8080";
+
+Use Spring configuration:
+
+* `application.properties`  
+* `application.yml`  
+* environment variables  
+* `@ConfigurationProperties`  
+* `@Value`
+
+Follow existing configuration patterns.
+
+Never commit:
+
+* passwords  
+* API keys  
+* private keys  
+* access tokens  
+* database credentials  
+* JWT secrets
+
+## **application.properties / application.yml**
+
+Preserve profile separation.
+
+Possible profiles:
+
+application.yml  
+application-dev.yml  
+application-test.yml  
+application-prod.yml
+
+Do not move production configuration into default configuration casually.
+
+Do not enable destructive schema generation in production.
+
+Be especially careful with:
+
+spring.jpa.hibernate.ddl-auto=create  
+spring.jpa.hibernate.ddl-auto=create-drop
+
+## **Logging**
+
+Use the project's logging framework.
+
+For Spring Boot this is normally SLF4J.
+
+Prefer:
+
+private static final Logger log \=  
+        LoggerFactory.getLogger(MyService.class);
+
+or Lombok `@Slf4j` if already used.
+
+Do not use:
+
+System.out.println(...)  
+System.err.println(...)
+
+for application logging.
+
+Do not log:
+
+* passwords  
+* access tokens  
+* authorization headers  
+* private keys  
+* sensitive personal data
+
+## **Code Style**
+
+Match existing source style.
+
+Preserve:
+
+* indentation  
+* brace style  
+* naming  
+* package organization  
+* import ordering  
+* annotations style  
+* record/class usage  
+* null-handling conventions
+
+Do not reformat entire files unless necessary.
+
+Avoid unrelated whitespace changes.
+
+Avoid wildcard imports:
+
+import java.util.\*;
+
+unless the existing formatter enforces them.
+
+## **Naming**
+
+Use conventional Java names:
+
+ClassName  
+InterfaceName  
+methodName  
+variableName  
+CONSTANT\_NAME  
+package.name
+
+Use domain terminology already present in the repository.
+
+Do not rename domain concepts simply because another term seems cleaner.
+
+## **Null Handling**
+
+Prefer clear conditions.
+
+Good:
+
+value \!= null
+
+Good for text:
+
+value \!= null &amp;&amp; \!value.isBlank()
+
+Avoid unnecessary:
+
+Objects.nonNull(value)
+
+when a regular null check is clearer.
+
+Never compare Strings using:
+
+\==
+
+Use:
+
+equals()
+
+or:
+
+Objects.equals()
+
+when null-safe equality is needed.
+
+## **Collections and Streams**
+
+Use streams when they improve clarity.
+
+Do not replace simple loops with complicated stream pipelines merely for style.
+
+Avoid side effects inside streams.
+
+Bad:
+
+users.stream()  
+        .map(user \-\&gt; {  
+            user.setActive(true);  
+            repository.save(user);  
+            return user;  
+        })  
+        .toList();
+
+Use explicit iteration for stateful operations when clearer.
+
+## **Optional**
+
+Use `Optional` primarily for return values representing optional results.
+
+Avoid:
+
+Optional\&lt;User\&gt; user \= Optional.ofNullable(...);
+
+inside ordinary business logic unless useful.
+
+Never use:
+
+optional.get();
+
+without guaranteed presence.
+
+Prefer:
+
+orElseThrow(...)
+
+when the resource is required.
+
+## **Tests**
+
+Changes to behavior should normally include or update tests.
+
+Use the testing strategy already present.
+
+Potential test types include:
+
+* unit tests  
+* repository tests  
+* `@WebMvcTest`  
+* `@DataJpaTest`  
+* `@SpringBootTest`  
+* integration tests  
+* Testcontainers
+
+Do not turn every test into `@SpringBootTest`.
+
+Prefer the smallest appropriate test scope.
+
+## **Unit Tests**
+
+Service tests should generally isolate dependencies using Mockito when the project follows unit-testing conventions.
+
+Verify:
+
+* successful behavior  
+* missing resources  
+* invalid states  
+* boundary conditions  
+* duplicate/conflict cases  
+* update behavior
+
+Do not test implementation details unnecessarily.
+
+Test observable behavior.
+
+## **Controller Tests**
+
+When controller tests exist, verify:
+
+* HTTP status  
+* response body  
+* validation  
+* serialization  
+* deserialization  
+* error responses  
+* service interaction
+
+Use the project's existing MockMvc or WebTestClient approach.
+
+Do not introduce a second HTTP testing framework unnecessarily.
+
+## **Repository Tests**
+
+Repository tests should focus on persistence behavior.
+
+Typical annotation:
+
+@DataJpaTest
+
+Test custom queries and meaningful persistence behavior.
+
+Do not write repository tests merely to prove that `JpaRepository.save()` works.
+
+## **Test Data**
+
+Tests must be deterministic.
+
+Do not depend on:
+
+* execution order  
+* production data  
+* local machine state  
+* current date/time without control  
+* random values without fixed seeds  
+* external APIs unless explicitly integration-tested
+
+## **External Services**
+
+For integrations with external APIs:
+
+* inspect existing client abstraction  
+* preserve timeout behavior  
+* preserve retry behavior  
+* avoid real network calls in unit tests  
+* mock at the appropriate boundary
+
+Do not add retries blindly.
+
+Retries can duplicate non-idempotent operations.
+
+## **Date and Time**
+
+Use `java.time`.
+
+Prefer:
+
+Instant  
+LocalDate  
+LocalDateTime  
+OffsetDateTime  
+ZonedDateTime  
+Duration
+
+Avoid introducing:
+
+java.util.Date  
+java.util.Calendar
+
+unless required by existing APIs.
+
+Be explicit about timezone when timestamps cross system boundaries.
+
+## **Concurrency**
+
+Do not introduce parallel execution without verifying thread safety.
+
+Be especially cautious with:
+
+parallelStream()  
+@Async  
+CompletableFuture  
+custom Executor  
+scheduled jobs
+
+Consider:
+
+* transactional context  
+* request context  
+* mutable state  
+* entity manager boundaries  
+* exception propagation
+
+## **Performance**
+
+Do not prematurely optimize.
+
+However, watch for obvious persistence problems:
+
+* N+1 queries  
+* loading entire tables  
+* unbounded result sets  
+* repeated queries inside loops  
+* eager relationship explosions
+
+Use pagination for potentially large collections where the API architecture supports it.
+
+Do not add caching without a demonstrated reason.
+
+## **Security**
+
+Treat all external input as untrusted.
+
+Never construct SQL from raw user input.
+
+Avoid exposing:
+
+* stack traces  
+* internal exception classes  
+* filesystem paths  
+* database details  
+* secrets
+
+through API responses.
+
+Validate uploads, filenames, URLs, and identifiers when relevant.
+
+Do not weaken security controls merely to simplify implementation.
+
+## **Dependency Changes**
+
+Before adding a dependency:
+
+1. verify the required capability is not already available  
+2. check for an existing library performing the same function  
+3. ensure compatibility with the project's Java and Spring Boot versions  
+4. prefer Spring-managed dependencies where possible
+
+Do not upgrade unrelated dependencies.
+
+Do not update the Spring Boot version unless the task requires it.
+
+## **Refactoring**
+
+Refactoring is permitted only when it directly supports the requested task or eliminates a clear defect encountered while implementing it.
+
+Avoid unrelated cleanup.
+
+Do not rename large portions of the codebase.
+
+Do not perform architectural migrations without explicit instruction.
+
+A bug fix should not become a repository-wide rewrite.
+
+## **Compatibility**
+
+Preserve compatibility unless explicitly instructed otherwise.
+
+Consider:
+
+* API contracts  
+* JSON field names  
+* database columns  
+* URLs  
+* HTTP statuses  
+* configuration keys  
+* environment variables  
+* public Java APIs  
+* tests  
+* serialized values  
+* enum names
+
+Never casually rename serialized fields.
+
+For example, changing:
+
+private String userName;
+
+to:
+
+private String username;
+
+may alter JSON and persistence behavior.
+
+Check before changing.
+
+## **Generated Files**
+
+Do not manually edit generated files unless the project explicitly expects it.
+
+Examples:
+
+* `target/`  
+* `build/`  
+* `generated-sources/`  
+* OpenAPI-generated code  
+* compiled output  
+* coverage output
+
+Modify the source or generator configuration instead.
+
+## **Files That Usually Must Not Be Modified**
+
+Unless required by the task, avoid modifying:
+
+* `.git/`  
+* `.idea/`  
+* `.vscode/`  
+* `target/`  
+* `build/`  
+* `node_modules/`  
+* `generated/`  
+* binary files  
+* lock files unrelated to dependency changes
+
+Do not commit IDE-local state.
+
+## **Git Discipline**
+
+Keep changes focused.
+
+Before completing the task, inspect:
+
+git diff
+
+and:
+
+git status
+
+Check for:
+
+* unrelated modifications  
+* accidental formatting  
+* debug code  
+* generated files  
+* secrets  
+* temporary files
+
+Do not discard existing user changes.
+
+Do not use destructive commands such as:
+
+git reset \--hard  
+git clean \-fd  
+git checkout .
+
+unless explicitly authorized.
+
+Never overwrite unrelated uncommitted work.
+
+## **Validation Procedure**
+
+After implementing changes, perform the strongest validation reasonably available.
+
+Preferred order:
+
+1. Compile  
+2. Run affected tests  
+3. Run full test suite  
+4. Run static checks or formatter if configured  
+5. Inspect final diff
+
+For Maven:
+
+./mvnw test
+
+If needed:
+
+./mvnw clean verify
+
+For Gradle:
+
+./gradlew test
+
+or:
+
+./gradlew build
+
+Do not report success if tests fail.
+
+If tests cannot be run, state why.
+
+## **Failure Handling**
+
+If a build or test fails:
+
+1. read the actual error  
+2. identify whether it was introduced by the current change  
+3. fix the root cause  
+4. rerun the relevant validation
+
+Do not:
+
+* delete failing tests  
+* disable tests  
+* comment out assertions  
+* catch exceptions broadly  
+* remove validation  
+* weaken security
+
+just to make the build green.
+
+Existing unrelated failures should be reported separately.
+
+## **Implementation Strategy**
+
+For non-trivial tasks:
+
+1. inspect relevant code  
+2. identify the current execution path  
+3. identify affected contracts  
+4. make the minimum coherent change  
+5. update tests  
+6. run validation  
+7. inspect the diff
+
+Do not begin by creating new abstractions.
+
+First understand what already exists.
+
+## **Decision Priority**
+
+When instructions conflict, use this priority:
+
+1\. Explicit user request  
+2\. More specific nested AGENTS.md  
+3\. Repository architecture and conventions  
+4\. This AGENTS.md  
+5\. General Spring / Java conventions
+
+Do not override explicit project behavior with generic best practices.
+
+## **When Requirements Are Ambiguous**
+
+Infer intent from:
+
+* existing implementation  
+* tests  
+* API conventions  
+* domain naming  
+* similar features  
+* README / documentation  
+* repository architecture
+
+Prefer consistency with the repository.
+
+Do not invent large requirements.
+
+If multiple implementations are possible, choose the smallest solution compatible with existing patterns.
+
+## **Definition of Done**
+
+A task is complete only when:
+
+* the requested behavior is implemented  
+* existing architecture is respected  
+* relevant tests are added or updated  
+* affected tests pass  
+* the project compiles  
+* no obvious regression was introduced  
+* no unrelated files were modified  
+* no debug code remains  
+* no secrets were added  
+* the final diff has been reviewed
+
+## **Final Response**
+
+When reporting completed work, summarize:
+
+* what changed  
+* important implementation decisions  
+* tests or validation performed  
+* unresolved issues or limitations
+
+Do not provide a long tutorial unless requested.
+
+Do not claim that something was tested if it was not.
+
+Do not claim that the application works merely because the code appears correct.
+
+## **Primary Directive**
+
+Understand the repository first.
+
+Then make the smallest correct change that preserves its architecture and contracts.
+
+Do not treat the repository as a blank project.
+
+Do not optimize for generating more code.
+
+Optimize for producing a correct, minimal, verified change.</code></pre></div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He guardado este contenido como <span class="path">AGENTS.md</span>.</strong></div><div class="note">Es la política de ingeniería común: arquitectura Spring Boot, persistencia, seguridad, tests, Git discipline y definition of done.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>No he duplicado estas reglas dentro de cada agente.</strong></div><div class="note">Los agentes añaden responsabilidades; AGENTS.md contiene las reglas comunes del repositorio.</div></div>
+</div>
+</section>
+
+<section class="section" id="s5">
+<div class="section-head"><h2>5. Configurar <span class="path">opencode.jsonc</span></h2></div>
+<div class="section-body">
+  <p>Ubicación: <span class="path">PROJECT/opencode.jsonc</span>.</p>
+  <div class="callout warn"><strong>Regla de permisos:</strong> en OpenCode V2 importa el orden de las reglas coincidentes. La excepción específica debe aparecer después de la regla general.</div>
+  <div class="codebox"><div class="codehead">opencode.jsonc <button class="copy">Copiar</button></div><pre><code>{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "implementer",
+
+  "permissions": [
+    { "action": "external_directory", "resource": "*", "effect": "deny" },
+
+    { "action": "shell", "resource": "*", "effect": "ask" },
+
+    { "action": "shell", "resource": "git status*", "effect": "allow" },
+    { "action": "shell", "resource": "git diff*", "effect": "allow" },
+    { "action": "shell", "resource": "git log*", "effect": "allow" },
+    { "action": "shell", "resource": "git show*", "effect": "allow" },
+
+    { "action": "shell", "resource": "git add*", "effect": "deny" },
+    { "action": "shell", "resource": "git commit*", "effect": "deny" },
+    { "action": "shell", "resource": "git push*", "effect": "deny" },
+    { "action": "shell", "resource": "git pull*", "effect": "deny" },
+    { "action": "shell", "resource": "git merge*", "effect": "deny" },
+    { "action": "shell", "resource": "git rebase*", "effect": "deny" },
+    { "action": "shell", "resource": "git reset*", "effect": "deny" },
+    { "action": "shell", "resource": "git checkout*", "effect": "deny" },
+    { "action": "shell", "resource": "git switch*", "effect": "deny" },
+    { "action": "shell", "resource": "git restore*", "effect": "deny" },
+    { "action": "shell", "resource": "git clean*", "effect": "deny" }
+  ]
+}</code></pre></div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>El agente principal por defecto es <span class="path">implementer</span>.</strong></div><div class="note">Debe coincidir con <span class="path">.opencode/agents/implementer.md</span>.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Las IAs pueden inspeccionar Git pero no administrarlo.</strong></div><div class="note">El control de <span class="path">add/commit/push/merge/rebase/reset</span> permanece en tus manos.</div></div>
+</div>
+</section>
+
+<section class="section" id="s6">
+<div class="section-head"><h2>6. Codex — <span class="path">implementer.md</span></h2></div>
+<div class="section-body">
+  <p>Ubicación: <span class="path">.opencode/agents/implementer.md</span>.</p>
+  <div class="codebox"><div class="codehead">implementer.md <button class="copy">Copiar</button></div><pre><code data-template="implementer">---
+description: Implements features, fixes, tests, and focused refactors while preserving repository conventions.
+mode: primary
+model: "{{CODEX_MODEL}}"
+permissions:
+  - action: read
+    resource: "*"
+    effect: allow
+
+  - action: edit
+    resource: "*"
+    effect: allow
+
+  - action: edit
+    resource: "AGENTS.md"
+    effect: deny
+
+  - action: edit
+    resource: "opencode.jsonc"
+    effect: deny
+
+  - action: edit
+    resource: ".opencode/**"
+    effect: deny
+
+  - action: edit
+    resource: "docs/development-logs/**"
+    effect: deny
+
+  - action: subagent
+    resource: "*"
+    effect: deny
+
+  - action: subagent
+    resource: "reviewer"
+    effect: allow
+
+  - action: subagent
+    resource: "documenter"
+    effect: allow
+---
+
+You are the implementation agent for this repository.
+
+Always follow `AGENTS.md`.
+
+Your responsibility is to implement the requested change, not to approve your own work.
+
+Before changing code:
+
+1. Inspect the relevant repository structure.
+2. Read the affected implementation and tests.
+3. Identify existing conventions and similar behavior.
+4. Determine the smallest coherent change.
+
+During implementation:
+
+- modify only what is necessary for the task;
+- preserve existing architecture and public contracts;
+- avoid unrelated cleanup;
+- add or update tests when behavior changes;
+- run the strongest relevant validation reasonably available;
+- never change Git state or history.
+
+When finished, report:
+
+## Changes
+- files changed;
+- behavior implemented.
+
+## Validation
+- tests added or changed;
+- commands executed;
+- results.
+
+## Open issues
+- risks;
+- limitations;
+- decisions that still require review.
+</code></pre></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Codex puede implementar y testear, pero no cambiar sus propias reglas.</strong></div><div class="note">Se bloquean AGENTS.md, la configuración de OpenCode y la bitácora automática.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Puede lanzar Reviewer y Documenter como subagentes.</strong></div><div class="note">Todo lo demás queda denegado por la regla general de <span class="path">subagent</span>.</div></div>
+</div>
+</section>
+
+<section class="section" id="s7">
+<div class="section-head"><h2>7. Claude — <span class="path">reviewer.md</span></h2></div>
+<div class="section-body">
+  <p>Ubicación: <span class="path">.opencode/agents/reviewer.md</span>.</p>
+  <div class="codebox"><div class="codehead">reviewer.md <button class="copy">Copiar</button></div><pre><code data-template="reviewer">---
+description: Reviews the staged candidate for correctness, regressions, security, design, and missing tests without modifying files.
+mode: subagent
+model: "{{CLAUDE_MODEL}}"
+permissions:
+  - action: read
+    resource: "*"
+    effect: allow
+
+  - action: edit
+    resource: "*"
+    effect: deny
+
+  - action: shell
+    resource: "*"
+    effect: deny
+
+  - action: shell
+    resource: "git status*"
+    effect: allow
+
+  - action: shell
+    resource: "git diff*"
+    effect: allow
+
+  - action: shell
+    resource: "git log*"
+    effect: allow
+
+  - action: shell
+    resource: "git show*"
+    effect: allow
+---
+
+You are the independent senior reviewer for this repository.
+
+Always follow `AGENTS.md`.
+
+Do not modify any file.
+
+Your primary review target is the staged candidate:
+
+`git diff --cached`
+
+You may read additional files only when context is required to evaluate the diff correctly.
+
+Review for:
+
+1. Functional correctness.
+2. Bugs and regressions.
+3. Edge cases.
+4. Architecture and design violations.
+5. Maintainability problems.
+6. Security issues.
+7. Error-handling problems.
+8. Unnecessary duplication.
+9. Missing or insufficient tests.
+10. Changes outside the requested scope.
+11. Violations of `AGENTS.md`.
+
+Order findings by severity:
+
+- CRITICAL
+- HIGH
+- MEDIUM
+- LOW
+
+For every finding provide:
+
+- file;
+- approximate location;
+- problem;
+- consequence;
+- recommended correction.
+
+Do not invent issues merely to produce feedback.
+
+If there are no relevant findings, end exactly with:
+
+REVIEW APPROVED
+</code></pre></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Claude es read-only.</strong></div><div class="note">Debe informar del problema; Codex o tú decidís cómo corregirlo.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Su fuente primaria será el staged diff.</strong></div><div class="note">El comando <span class="path">/review</span> le inyectará <span class="path">git diff --cached</span> directamente.</div></div>
+</div>
+</section>
+
+<section class="section" id="s8">
+<div class="section-head"><h2>8. Gemini — <span class="path">documenter.md</span></h2></div>
+<div class="section-body">
+  <p>Ubicación: <span class="path">.opencode/agents/documenter.md</span>.</p>
+  <div class="codebox"><div class="codehead">documenter.md <button class="copy">Copiar</button></div><pre><code data-template="documenter">---
+description: Produces development-log reports from immutable interval diffs and may update project documentation only when explicitly requested.
+mode: subagent
+model: "{{GEMINI_MODEL}}"
+permissions:
+  - action: read
+    resource: "*"
+    effect: allow
+
+  - action: edit
+    resource: "*"
+    effect: deny
+
+  - action: edit
+    resource: "README.md"
+    effect: allow
+
+  - action: edit
+    resource: "docs/**"
+    effect: allow
+
+  - action: shell
+    resource: "*"
+    effect: deny
+---
+
+You are the repository Documenter.
+
+Always follow:
+
+- `AGENTS.md`
+- `docs/development-logs/README.md`
+
+For automatic development logs, your source of truth is the immutable interval diff supplied by the external monitor.
+
+Do not reconstruct the interval from conversation memory.
+Do not use `git diff HEAD` as a substitute for the supplied interval diff.
+Do not read the entire repository by default.
+
+Use progressive disclosure:
+
+1. Read the supplied S0 → S1 diff.
+2. Read the supplied final-status metadata and affected-file list.
+3. Read only directly affected files when the diff is insufficient.
+4. Read directly related interfaces, contracts, tests, or task context only when necessary.
+5. Stop expanding context once there is enough evidence.
+
+For interval logs:
+
+- write exactly one report at the target path provided by the monitor;
+- do not create a report when the monitor says there are no relevant changes;
+- describe functional, structural, configuration, or behavioral changes;
+- omit mechanical noise;
+- never invent motives, test results, effects, or design decisions;
+- never include credentials, tokens, secrets, authorization headers, or private keys;
+- if verification evidence is absent, write `Not verified`;
+- never modify source code or tests.
+
+The development-log output itself must never become input to a later interval.
+
+When explicitly asked to update normal project documentation, you may modify:
+
+- `README.md`
+- `docs/**`
+
+Do not modify any other path.
+</code></pre></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Gemini no puede editar código ni tests.</strong></div><div class="note">Puede escribir documentación, pero el comando automático restringirá aún más la tarea al archivo del intervalo.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Gemini usa divulgación progresiva.</strong></div><div class="note">Primero diff y metadatos; después solo abre archivos directamente relacionados si son imprescindibles.</div></div>
+</div>
+</section>
+
+<section class="section" id="s9">
+<div class="section-head"><h2>9. Crear los comandos de OpenCode</h2></div>
+<div class="section-body">
+
+<h3>9.1 Implementar</h3>
+<p>Archivo: <span class="path">.opencode/commands/implement.md</span></p>
+<div class="codebox"><div class="codehead">implement.md <button class="copy">Copiar</button></div><pre><code>---
+description: Implement a focused task with the implementation agent.
+agent: implementer
+subagent: false
+---
+
+Implement the following task:
+
+$ARGUMENTS
+
+Before editing:
+
+1. inspect the relevant repository context;
+2. identify the affected files and contracts;
+3. follow `AGENTS.md`;
+4. preserve existing architecture.
+
+After editing:
+
+1. run the strongest relevant validation reasonably available;
+2. summarize the changes and validation;
+3. do not run `git add`;
+4. do not commit;
+5. do not push.
+</code></pre></div>
+
+<h3>9.2 Revisar candidato staged</h3>
+<p>Archivo: <span class="path">.opencode/commands/review.md</span></p>
+<div class="codebox"><div class="codehead">review.md <button class="copy">Copiar</button></div><pre><code>---
+description: Review exactly the staged candidate for the next commit.
+agent: reviewer
+subagent: true
+---
+
+Review the following staged candidate.
+
+## Git status
+
+!`git status --short`
+
+## Candidate summary
+
+!`git diff --cached --stat`
+
+## Full staged diff
+
+!`git diff --cached`
+
+Apply `AGENTS.md` and the reviewer rules.
+
+Do not modify any file.
+
+If there are no staged changes, state that clearly and do not output `REVIEW APPROVED`.
+</code></pre></div>
+<div class="callout ok"><strong>Claude no depende del resumen de Codex.</strong> El bloque <span class="path">!`git diff --cached`</span> inserta la salida real del comando dentro del prompt del Reviewer.</div>
+
+<h3>9.3 Actualizar documentación normal cuando proceda</h3>
+<p>Archivo: <span class="path">.opencode/commands/update-docs.md</span></p>
+<div class="codebox"><div class="codehead">update-docs.md <button class="copy">Copiar</button></div><pre><code>---
+description: Update normal project documentation from the staged candidate when documentation is actually affected.
+agent: documenter
+subagent: true
+---
+
+Review the staged candidate and update normal project documentation only where the change actually requires it.
+
+## Git status
+
+!`git status --short`
+
+## Candidate summary
+
+!`git diff --cached --stat`
+
+## Full staged diff
+
+!`git diff --cached`
+
+Rules:
+
+- follow `AGENTS.md`;
+- do not create development-log interval files from this command;
+- do not modify source code or tests;
+- update only `README.md` or non-log files under `docs/**`;
+- if no documentation change is required, make no edits and say so explicitly.
+</code></pre></div>
+<p class="muted small">Este comando es para README/documentación normal. No genera los informes de 30 minutos.</p>
+
+<h3>9.4 Generar un informe de intervalo</h3>
+<p>Archivo: <span class="path">.opencode/commands/document-interval.md</span></p>
+<div class="codebox"><div class="codehead">document-interval.md <button class="copy">Copiar</button></div><pre><code>---
+description: Generate one development-log report from an immutable S0-to-S1 interval diff prepared by the external monitor.
+agent: documenter
+subagent: true
+---
+
+Generate the development-log report for this interval.
+
+The monitor supplies the target output path in the arguments:
+
+$ARGUMENTS
+
+The files attached to this invocation contain:
+
+1. the immutable `S0 → S1` interval diff;
+2. final-status metadata and the affected-file list.
+
+Follow `docs/development-logs/README.md` exactly.
+
+Important:
+
+- use the attached interval diff as the source of truth;
+- do not replace it with `git diff HEAD`;
+- do not use conversation memory to reconstruct changes;
+- write only the target interval report;
+- do not modify source code, tests, README, or unrelated documentation;
+- if a fact cannot be verified from the supplied evidence or minimal additional context, state that explicitly.
+</code></pre></div>
+<p class="muted small">Normalmente no lo ejecutarás a mano: lo invoca el monitor PowerShell con el diff y los metadatos adjuntos.</p>
+
+<div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Los cuatro comandos existen y OpenCode los detecta.</strong></div><div class="note"><span class="path">/review</span> es manual; <span class="path">document-interval</span> forma parte de la automatización del monitor.</div></div>
+</div>
+</section>
+
+<section class="section" id="s10">
+<div class="section-head"><h2>10. Guardar la especificación final de la bitácora</h2></div>
+<div class="section-body">
+  <p>Ubicación recomendada: <span class="path">docs/development-logs/README.md</span>.</p>
+  <div class="callout"><strong>Esta es la versión en inglés del mecanismo que definimos:</strong> intervalos de 30 minutos, S0/S1, captura no destructiva, un único archivo máximo por intervalo, exclusiones obligatorias, divulgación progresiva e idempotencia.</div>
+  <div class="codebox long"><div class="codehead">docs/development-logs/README.md <button class="copy">Copiar</button></div><pre><code># Functional Change Log
+
+This specification defines how the **Documenter** generates project change reports.
+
+The goal is not to produce an exhaustive line-by-line changelog. The goal is to preserve a readable history of **functional, structural, configuration, or behavioral changes** derived from real repository changes.
+
+## Location and granularity
+
+- Reports are stored under `docs/development-logs/`.
+- **Each 30-minute interval may produce at most one Markdown file.**
+- An interval with no relevant changes produces **no file**.
+- Files are grouped by date.
+- Recommended layout:
+
+```text
+docs/
+└── development-logs/
+    └── YYYY-MM-DD/
+        ├── HH-mm--HH-mm.md
+        ├── HH-mm--HH-mm.md
+        └── ...
+```
+
+Example:
+
+```text
+docs/development-logs/2026-10-15/10-00--10-30.md
+```
+
+The filename represents **the interval being documented**, even if Gemini finishes writing later because it runs asynchronously.
+
+## Source of truth: interval diff
+
+The report must be generated from a **diff between the initial and final state of the interval**, not from any model's conversational memory and not from `git diff HEAD` as the sole source.
+
+`git diff HEAD` answers: “What changed relative to the last commit?”
+
+This log needs to answer: “What changed between the beginning and the end of these 30 minutes?”
+
+### Monitor process
+
+1. At the beginning of the interval, the external monitor captures a **working-tree snapshot S0**.
+2. Development continues normally for 30 minutes.
+3. At the end of the interval, the monitor captures **snapshot S1**.
+4. The monitor generates the `S0 → S1` diff.
+5. The diff must include:
+   - modified files;
+   - added files;
+   - deleted files;
+   - detectable renames;
+   - staged and unstaged changes that are part of the observed state;
+   - relevant new untracked files within project scope.
+6. The monitor filters excluded paths and generated noise.
+7. If no relevant change remains, it does not invoke the Documenter and creates no report.
+8. If relevant changes exist, it gives Gemini the interval diff and the minimum required context.
+9. Gemini writes **one report** for that interval at the expected path.
+
+### Non-destructive capture
+
+S0 and S1 must be obtained **without altering the user's real working tree or Git index**.
+
+The capture mechanism must not use:
+
+- automatic commits;
+- `git stash push` on the real work;
+- `git reset`;
+- `git checkout`;
+- operations that change the real index or discard user changes.
+
+The recommended implementation uses temporary Git indexes, or an equivalent mechanism, to build temporary trees. Relevant untracked files must be included without modifying the user's real index.
+
+The monitor may use auxiliary Git commands internally, but its contract is:
+
+```text
+S0 + S1 → immutable interval diff
+```
+
+The Documenter does not need to know how the snapshots were created. It only needs the resulting diff and, when available, additional metadata.
+
+## Mandatory exclusions
+
+The logging system's own output must never become input to the next interval.
+
+Exclude at least:
+
+```text
+docs/development-logs/**
+target/**
+build/**
+coverage/**
+generated/**
+node_modules/**
+.idea/**
+.vscode/**
+.git/**
+```
+
+Add other generated project paths when appropriate.
+
+This prevents loops such as:
+
+```text
+Gemini creates a log
+→ the log appears in the next interval diff
+→ Gemini documents that it created a log
+→ another log-related change appears
+```
+
+## Recording criteria
+
+- Group changes into **30-minute intervals**.
+- Record only intervals with relevant changes.
+- Create **at most one file per interval**.
+- Include as many functional actions as necessary inside that file.
+- Compare the initial and final state of the interval and omit intermediate edits that do not survive into the final state.
+- Identify the affected element: function, component, entity, class, service, controller, repository, DTO, mapper, test, configuration, or other relevant element.
+- Explain changes in behavior, responsibility, structure, contract, persistence, security, or configuration.
+- Avoid mechanical details such as reordered imports, trivial setters, local-variable renames, formatting, or removed lines when they have no functional effect.
+- Group several low-level edits when they form one functional action.
+- Do not invent motives, effects, test results, or design decisions.
+- When a fact cannot be determined from the diff or available context, state that explicitly.
+- Do not include passwords, tokens, JWT secrets, API keys, credentials, authorization headers, or other secrets.
+- Do not copy large code blocks unless required to explain a change.
+
+## Context supplied to Gemini
+
+Gemini should use **progressive disclosure** and consume the minimum context required.
+
+Recommended initial input:
+
+```text
+1. S0 → S1 interval diff
+2. git status --short or equivalent final-state metadata
+3. affected-file list
+4. available test result, if any
+5. related spec/task, only if it can be identified reliably
+```
+
+Gemini must not read the whole repository by default.
+
+If the diff is insufficient, it may open only:
+
+- affected files;
+- directly related interfaces or contracts;
+- the related feature/task documentation;
+- directly related tests.
+
+Stop expanding context as soon as enough evidence exists.
+
+## Asynchronous execution
+
+The **Documenter** runs as an OpenCode v2 child/subagent in the background.
+
+This means:
+
+- the main development session can continue while Gemini writes the report;
+- Gemini keeps its own model, context, and permissions;
+- changing the main-session model does not change the model fixed for the Documenter;
+- the generated filename always represents the documented interval, not Gemini's completion time.
+
+OpenCode is not the clock. The 30-minute interval is controlled by an **external monitor**, such as a PowerShell process, which prepares the diff and decides whether the Documenter should be invoked.
+
+## Idempotency and concurrency
+
+The monitor must prevent one interval from accidentally producing two reports.
+
+Rules:
+
+- only one automatic execution may be launched for a given interval;
+- if the interval file already exists, do not automatically create a second one;
+- manual regeneration must be explicit;
+- if Gemini finishes after the next interval has started, it must still write only the file for the interval it received;
+- the next interval must use its own independent S0 and S1.
+
+## Large diffs
+
+If an interval diff is too large for convenient single-pass analysis:
+
+- split analysis internally by file or area;
+- keep the same interval;
+- produce **one final report**;
+- prioritize files with functional changes;
+- open additional context only when necessary;
+- do not split one interval into several log files unless a human explicitly decides to do so.
+
+## Interval report template
+
+```markdown
+# Functional changes · [YYYY-MM-DD] · [HH:mm–HH:mm]
+
+## Summary
+[2–5 lines summarizing what changed during the interval.]
+
+## 1. [Short description of the change]
+
+**Element:** [Name and type of the affected element]  
+**Files:** [Related file paths]  
+**Action:** [Creation / Modification / Deletion]
+
+**Before:**  
+[What it did, what responsibility it had, or how it was configured at the beginning of the interval. If new, state that it did not exist or explain how the need was handled before.]
+
+**After:**  
+[What it does at the end of the interval.]
+
+**Impact:**  
+[What changes for users, other components, contracts, or execution. If external behavior is preserved, explain the relevant internal change.]
+
+**Verification:**  
+[Observed tests, compilation, or other checks. If there is no evidence: `Not verified`.]
+
+[Repeat this block for every relevant functional action in the interval.]
+
+## Relevant files
+
+- `[path]` — [why the file matters]
+
+## Global verification
+
+[Summary of available test/build/check evidence, or `Not verified`.]
+```
+
+## What must not appear in a report
+
+Omit noise unless it has a real functional effect:
+
+- reordered imports;
+- automatic formatting;
+- local-variable renames;
+- trivial setters/getters;
+- intermediate edits later reverted;
+- changes under `docs/development-logs/**`;
+- compiled or generated files;
+- secrets;
+- claims about tests that were not executed.
+
+## Final principle
+
+The log describes **the observable change between S0 and S1**.
+
+It does not describe the agent conversation, does not reconstruct every intermediate edit, and does not replace Git, tests, project requirements, or normal project documentation.
+</code></pre></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He guardado la especificación en el repositorio.</strong></div><div class="note">Gemini puede leerla siempre sin depender de que el prompt repita cada regla.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Entiendo que un intervalo vacío no genera archivo.</strong></div><div class="note">La ausencia de informe también es información: no hubo cambio relevante entre S0 y S1.</div></div>
+</div>
+</section>
+
+<section class="section" id="s11">
+<div class="section-head"><h2>11. Crear el monitor externo de 30 minutos</h2></div>
+<div class="section-body">
+  <p>Ubicación: <span class="path">tools/opencode/dev-log-monitor.ps1</span>.</p>
+  <div class="callout ok"><strong>No toca tu índice real.</strong> Cada snapshot utiliza <span class="path">GIT_INDEX_FILE</span> con un índice temporal, construye un tree Git y elimina ese índice temporal después.</div>
+  <div class="codebox long"><div class="codehead">dev-log-monitor.ps1 <button class="copy">Copiar</button></div><pre><code>param(
+    [int]$IntervalMinutes = 30
+)
+
+$ErrorActionPreference = "Stop"
+
+$RepoRoot = (git rev-parse --show-toplevel).Trim()
+if (-not $RepoRoot) {
+    throw "This script must run inside a Git repository."
+}
+
+Set-Location $RepoRoot
+
+$StateRoot = Join-Path $env:TEMP "opencode-devlog-monitor"
+New-Item -ItemType Directory -Force $StateRoot | Out-Null
+
+$ExcludedPathspecs = @(
+    ":(exclude)docs/development-logs/**",
+    ":(exclude)target/**",
+    ":(exclude)build/**",
+    ":(exclude)coverage/**",
+    ":(exclude)generated/**",
+    ":(exclude)node_modules/**",
+    ":(exclude).idea/**",
+    ":(exclude).vscode/**",
+    ":(exclude).git/**"
+)
+
+function New-WorkingTreeSnapshot {
+    $tempIndex = Join-Path $StateRoot ("index-" + [guid]::NewGuid().ToString("N"))
+
+    try {
+        $env:GIT_INDEX_FILE = $tempIndex
+
+        # Start from HEAD in a temporary index. The real Git index is untouched.
+        git read-tree HEAD | Out-Null
+
+        # Add the current working-tree state, including relevant untracked files.
+        $pathspecs = @(".") + $ExcludedPathspecs
+        &amp; git add -A -- @pathspecs | Out-Null
+
+        # Store the temporary tree and return its object ID.
+        $tree = (&amp; git write-tree).Trim()
+
+        if (-not $tree) {
+            throw "Could not create temporary Git tree."
+        }
+
+        return $tree
+    }
+    finally {
+        Remove-Item Env:GIT_INDEX_FILE -ErrorAction SilentlyContinue
+        Remove-Item $tempIndex -Force -ErrorAction SilentlyContinue
+    }
+}
+
+function Get-IntervalArtifacts {
+    param(
+        [string]$StartTree,
+        [string]$EndTree,
+        [datetime]$StartTime,
+        [datetime]$EndTime
+    )
+
+    $intervalId = "{0:yyyy-MM-dd}_{0:HH-mm}--{1:HH-mm}" -f $StartTime, $EndTime
+    $artifactDir = Join-Path $StateRoot $intervalId
+    New-Item -ItemType Directory -Force $artifactDir | Out-Null
+
+    $diffFile = Join-Path $artifactDir "interval.diff"
+    $metaFile = Join-Path $artifactDir "metadata.txt"
+
+    $pathspecs = @(".") + $ExcludedPathspecs
+
+    &amp; git diff --binary --full-index --find-renames $StartTree $EndTree -- @pathspecs |
+        Set-Content -Path $diffFile -Encoding UTF8
+
+    $nameStatus = &amp; git diff --name-status -M $StartTree $EndTree -- @pathspecs
+    $finalStatus = &amp; git status --short -- @pathspecs
+
+    @(
+        "Interval start: $($StartTime.ToString("yyyy-MM-dd HH:mm:ss"))"
+        "Interval end:   $($EndTime.ToString("yyyy-MM-dd HH:mm:ss"))"
+        "Start tree:     $StartTree"
+        "End tree:       $EndTree"
+        ""
+        "Affected files:"
+        $nameStatus
+        ""
+        "Final repository status:"
+        $finalStatus
+    ) | Set-Content -Path $metaFile -Encoding UTF8
+
+    return @{
+        DiffFile = $diffFile
+        MetaFile = $metaFile
+    }
+}
+
+function Start-Documenter {
+    param(
+        [datetime]$StartTime,
+        [datetime]$EndTime,
+        [string]$DiffFile,
+        [string]$MetaFile
+    )
+
+    $dateDir = $StartTime.ToString("yyyy-MM-dd")
+    $fileName = "{0:HH-mm}--{1:HH-mm}.md" -f $StartTime, $EndTime
+    $targetRelative = "docs/development-logs/$dateDir/$fileName"
+    $targetAbsolute = Join-Path $RepoRoot $targetRelative
+
+    # Idempotency: never launch a second automatic report for the same interval.
+    if (Test-Path $targetAbsolute) {
+        Write-Host "Log already exists: $targetRelative"
+        return
+    }
+
+    $promptArg = "Target output path: $targetRelative"
+
+    # Launch OpenCode separately so development can continue immediately.
+    # The command itself is configured to run the Documenter as a child/subagent.
+    Start-Process `
+        -FilePath "opencode" `
+        -WorkingDirectory $RepoRoot `
+        -ArgumentList @(
+            "run",
+            "--command", "document-interval",
+            "--file", $DiffFile,
+            "--file", $MetaFile,
+            $promptArg
+        ) `
+        -WindowStyle Hidden | Out-Null
+
+    Write-Host "Documenter launched for $targetRelative"
+}
+
+Write-Host "Development-log monitor started."
+Write-Host "Repository: $RepoRoot"
+Write-Host "Interval: $IntervalMinutes minutes"
+Write-Host "Press Ctrl+C to stop."
+
+$startTime = Get-Date
+$startTree = New-WorkingTreeSnapshot
+
+while ($true) {
+    Start-Sleep -Seconds ($IntervalMinutes * 60)
+
+    $endTime = Get-Date
+    $endTree = New-WorkingTreeSnapshot
+
+    if ($startTree -ne $endTree) {
+        $artifacts = Get-IntervalArtifacts `
+            -StartTree $startTree `
+            -EndTree $endTree `
+            -StartTime $startTime `
+            -EndTime $endTime
+
+        $diffLength = (Get-Item $artifacts.DiffFile).Length
+
+        if ($diffLength -gt 0) {
+            Start-Documenter `
+                -StartTime $startTime `
+                -EndTime $endTime `
+                -DiffFile $artifacts.DiffFile `
+                -MetaFile $artifacts.MetaFile
+        }
+    }
+    else {
+        Write-Host "No relevant changes in $($startTime.ToString("HH:mm"))–$($endTime.ToString("HH:mm"))."
+    }
+
+    # S1 becomes the next interval's S0.
+    $startTime = $endTime
+    $startTree = $endTree
+}
+</code></pre></div>
+
+  <h3>Arrancar el monitor al comenzar una sesión de desarrollo</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>Set-ExecutionPolicy -Scope Process Bypass
+.\tools\opencode\dev-log-monitor.ps1</code></pre></div>
+
+  <p>Para probarlo sin esperar 30 minutos:</p>
+  <div class="codebox"><div class="codehead">PowerShell — prueba <button class="copy">Copiar</button></div><pre><code>.\tools\opencode\dev-log-monitor.ps1 -IntervalMinutes 1</code></pre></div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>El monitor arranca desde la raíz y muestra el repositorio correcto.</strong></div><div class="note">Déjalo en una terminal aparte. OpenCode no es el reloj; este proceso externo lo es.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Una prueba de 1 minuto sin cambios no crea ningún log.</strong></div><div class="note">Eso verifica la condición “sin cambio relevante → no invocar Gemini”.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Una prueba con un cambio real crea como máximo un informe para el intervalo.</strong></div><div class="note">El nombre debe representar el intervalo, no la hora a la que Gemini terminó.</div></div>
+
+  <div class="callout warn"><strong>Importante:</strong> el script conserva los objetos temporales creados por <span class="path">git write-tree</span> en la base de objetos de Git hasta que el mantenimiento normal pueda limpiarlos. No altera working tree ni índice, pero no es literalmente “cero escrituras” dentro de <span class="path">.git</span>.</div>
+</div>
+</section>
+
+<section class="section" id="s12">
+<div class="section-head"><h2>12. Verificación inicial completa</h2></div>
+<div class="section-body">
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git status --short
+opencode</code></pre></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>OpenCode arranca sin errores de JSONC o frontmatter.</strong></div><div class="note">Si falla aquí, no empieces a desarrollar todavía.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong><span class="path">implementer</span>, <span class="path">reviewer</span> y <span class="path">documenter</span> están disponibles.</strong></div><div class="note">Los IDs de modelo deben ser válidos para cada proveedor.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Veo <span class="path">/implement</span>, <span class="path">/review</span> y <span class="path">/update-docs</span>.</strong></div><div class="note">El comando de intervalo existe aunque normalmente lo consuma el monitor.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>El monitor ha superado una prueba corta.</strong></div><div class="note">Hazla antes de confiarle una sesión de varias horas.</div></div>
+</div>
+</section>
+
+<section class="section" id="s13">
+<div class="section-head"><h2>13. Flujo diario que debes interiorizar</h2></div>
+<div class="section-body">
+
+<h3>A. Arrancar la sesión</h3>
+<div class="codebox"><div class="codehead">Terminal 1 — monitor <button class="copy">Copiar</button></div><pre><code>.\tools\opencode\dev-log-monitor.ps1</code></pre></div>
+<div class="codebox"><div class="codehead">Terminal 2 — Git <button class="copy">Copiar</button></div><pre><code>git status
+git branch --show-current</code></pre></div>
+<div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Monitor activo y rama correcta.</strong></div><div class="note">El monitor observa el trabajo; no controla tu flujo Git.</div></div>
+
+<h3>B. Implementar una tarea acotada</h3>
+<div class="codebox"><div class="codehead">OpenCode <button class="copy">Copiar</button></div><pre><code>/implement Describe a concrete, bounded task here.</code></pre></div>
+<div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Codex ha implementado y ha informado de la validación real.</strong></div><div class="note">Tu AGENTS.md ya le exige preservar arquitectura, contratos y tests.</div></div>
+
+<h3>C. Leer tú el working diff</h3>
+<div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git status --short
+git diff --stat
+git diff</code></pre></div>
+<div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Entiendo qué ha cambiado antes de prepararlo.</strong></div><div class="note">La revisión de Claude no sustituye tu responsabilidad sobre el código.</div></div>
+
+<h3>D. Preparar el candidato a commit</h3>
+<div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git add -A
+git status --short
+git diff --cached --stat</code></pre></div>
+<div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>El staging contiene exactamente lo que quiero revisar.</strong></div><div class="note">Si hay cambios mezclados, usa <span class="path">git add -p</span> en lugar de añadirlo todo.</div></div>
+
+<h3>E. Claude hace la puerta de calidad</h3>
+<div class="codebox"><div class="codehead">OpenCode <button class="copy">Copiar</button></div><pre><code>/review</code></pre></div>
+<div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He leído los hallazgos y he decidido cuáles acepto.</strong></div><div class="note">No obedezcas automáticamente a Claude. Un revisor también puede equivocarse.</div></div>
+
+<h3>F. Documentación normal, solo cuando haga falta</h3>
+<div class="codebox"><div class="codehead">OpenCode <button class="copy">Copiar</button></div><pre><code>/update-docs</code></pre></div>
+<div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Si Gemini modificó README/docs, he revisado sus cambios.</strong></div><div class="note">La bitácora de 30 minutos es automática y separada; aquí hablamos de documentación mantenida del proyecto.</div></div>
+
+<h3>G. Mientras tanto, la bitácora funciona sola</h3>
+<div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>No hago nada manual cada 30 minutos.</strong></div><div class="note">El monitor captura S1, compara con S0 y solo si hay cambios lanza el Documenter en otro proceso.</div></div>
+
+</div>
+</section>
+
+<section class="section" id="s14">
+<div class="section-head"><h2>14. Si Claude encuentra un problema</h2></div>
+<div class="section-body">
+  <div class="callout bad"><strong>Error que debes evitar:</strong> modificar código después del staging y ejecutar <span class="path">/review</span> sin volver a preparar los cambios. Claude volvería a revisar el candidato anterior.</div>
+
+  <div class="codebox"><div class="codehead">OpenCode <button class="copy">Copiar</button></div><pre><code>/implement Fix the accepted findings from the previous review without expanding the task scope.</code></pre></div>
+
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git diff
+git add -A
+git diff --cached --stat</code></pre></div>
+
+  <div class="codebox"><div class="codehead">OpenCode <button class="copy">Copiar</button></div><pre><code>/review</code></pre></div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Después de cada corrección actualizo el staging antes de revisar.</strong></div><div class="note">Ese gesto es el que hace que <span class="path">git diff --cached</span> represente la nueva versión.</div></div>
+
+  <h3>Quitar todo del staging sin borrar el trabajo</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git restore --staged .</code></pre></div>
+</div>
+</section>
+
+<section class="section" id="s15">
+<div class="section-head"><h2>15. Commit final: siempre humano</h2></div>
+<div class="section-body">
+  <div class="codebox"><div class="codehead">PowerShell — antes del commit <button class="copy">Copiar</button></div><pre><code>git status
+git diff --cached --stat
+git diff --cached</code></pre></div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Entiendo todos los archivos staged y la revisión final es aceptable.</strong></div><div class="note">El criterio no es “Claude dijo OK”; el criterio es que tú aceptas el candidato y su validación.</div></div>
+
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git commit -m "type: concise description"</code></pre></div>
+
+  <div class="codebox"><div class="codehead">PowerShell — después <button class="copy">Copiar</button></div><pre><code>git status
+git log -1 --oneline</code></pre></div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>El commit existe y el working tree queda como esperaba.</strong></div><div class="note">Push y merge siguen el flujo que marque el bootcamp.</div></div>
+</div>
+</section>
+
+<section class="section" id="s16">
+<div class="section-head"><h2>16. Chuleta cuando ya no necesites la guía completa</h2></div>
+<div class="section-body">
+
+<div class="codebox"><div class="codehead">Ciclo habitual <button class="copy">Copiar</button></div><pre><code># Start of development session
+.\tools\opencode\dev-log-monitor.ps1
+
+# Check context
+git status
+git branch --show-current
+
+# OpenCode
+/implement TASK
+
+# Human inspection
+git diff
+
+# Prepare candidate
+git add -A
+git diff --cached --stat
+
+# Independent review
+/review
+
+# If corrections are needed
+/implement FIX
+git add -A
+/review
+
+# Optional maintained documentation
+/update-docs
+git add -A
+/review
+
+# Human commit
+git diff --cached
+git commit -m "type: description"
+git status</code></pre></div>
+
+<table>
+<thead><tr><th>Pregunta</th><th>Respuesta</th></tr></thead>
+<tbody>
+<tr><td>¿Quién implementa?</td><td>Codex / <span class="path">implementer</span>.</td></tr>
+<tr><td>¿Qué revisa Claude?</td><td>El candidato staged: <span class="path">git diff --cached</span>.</td></tr>
+<tr><td>¿Claude modifica código?</td><td>No.</td></tr>
+<tr><td>¿De dónde sale la bitácora?</td><td>Del diff inmutable S0 → S1 creado por el monitor cada 30 minutos.</td></tr>
+<tr><td>¿Gemini usa la conversación para reconstruir cambios?</td><td>No.</td></tr>
+<tr><td>¿Un intervalo vacío crea log?</td><td>No.</td></tr>
+<tr><td>¿Los logs vuelven a entrar en el siguiente diff?</td><td>No; <span class="path">docs/development-logs/**</span> está excluido.</td></tr>
+<tr><td>¿Quién controla Git?</td><td>Tú.</td></tr>
+<tr><td>¿Quién decide si un hallazgo de Claude es válido?</td><td>Tú.</td></tr>
+</tbody>
+</table>
+
+<div class="callout"><strong>Cuando lo hayas interiorizado:</strong> tu rutina consciente debería reducirse a implementar → leer diff → stage → review → corregir si procede → commit. La bitácora debería ser prácticamente invisible mientras trabajas.</div>
+</div>
+</section>
+
+<section class="section">
+<div class="section-head"><h2>Referencias técnicas</h2></div>
+<div class="section-body small">
+<ul>
+  <li><a href="https://opencode.ai/v2/docs/agents" target="_blank" rel="noreferrer">OpenCode V2 — Agents</a></li>
+  <li><a href="https://dev.opencode.ai/v2/docs/commands/" target="_blank" rel="noreferrer">OpenCode V2 — Commands</a></li>
+  <li><a href="https://dev.opencode.ai/v2/docs/permissions/" target="_blank" rel="noreferrer">OpenCode V2 — Permissions</a></li>
+  <li><a href="https://dev.opencode.ai/v2/docs/cli/commands/" target="_blank" rel="noreferrer">OpenCode V2 — CLI run / --command / --file</a></li>
+</ul>
+<p>La guía usa sintaxis V2 deliberadamente. Los contenidos que forman parte del repositorio están en inglés.</p>
+</div>
+</section>
+
+<p class="footer">Checklist y modelos se guardan mediante localStorage. El HTML es autocontenido y no necesita servidor.</p>
+</main>
+
+<script>
+(() => {
+  const key = 'guia-opencode-v2-checks-v2';
+  const checks = [...document.querySelectorAll('.check')];
+  const progress = document.getElementById('progress');
+  const progressText = document.getElementById('progressText');
+  const saved = JSON.parse(localStorage.getItem(key) || '[]');
+
+  checks.forEach((c,i) => c.checked = !!saved[i]);
+
+  function updateProgress() {
+    const done = checks.filter(c => c.checked).length;
+    progress.style.width = (checks.length ? done / checks.length * 100 : 0) + '%';
+    progressText.textContent = `${done} / ${checks.length}`;
+    localStorage.setItem(key, JSON.stringify(checks.map(c => c.checked)));
+  }
+  checks.forEach(c => c.addEventListener('change', updateProgress));
+  updateProgress();
+
+  document.getElementById('reset').addEventListener('click', () => {
+    if (!confirm('¿Reiniciar todo el checklist?')) return;
+    checks.forEach(c => c.checked = false);
+    updateProgress();
+  });
+
+  document.querySelectorAll('.copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const code = btn.closest('.codebox').querySelector('code').innerText;
+      try {
+        await navigator.clipboard.writeText(code);
+        const old = btn.textContent;
+        btn.textContent = 'Copiado';
+        setTimeout(() => btn.textContent = old, 1100);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = code;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+    });
+  });
+
+  const templates = {
+    implementer: '---\ndescription: Implements features, fixes, tests, and focused refactors while preserving repository conventions.\nmode: primary\nmodel: "{{CODEX_MODEL}}"\npermissions:\n  - action: read\n    resource: "*"\n    effect: allow\n\n  - action: edit\n    resource: "*"\n    effect: allow\n\n  - action: edit\n    resource: "AGENTS.md"\n    effect: deny\n\n  - action: edit\n    resource: "opencode.jsonc"\n    effect: deny\n\n  - action: edit\n    resource: ".opencode/**"\n    effect: deny\n\n  - action: edit\n    resource: "docs/development-logs/**"\n    effect: deny\n\n  - action: subagent\n    resource: "*"\n    effect: deny\n\n  - action: subagent\n    resource: "reviewer"\n    effect: allow\n\n  - action: subagent\n    resource: "documenter"\n    effect: allow\n---\n\nYou are the implementation agent for this repository.\n\nAlways follow `AGENTS.md`.\n\nYour responsibility is to implement the requested change, not to approve your own work.\n\nBefore changing code:\n\n1. Inspect the relevant repository structure.\n2. Read the affected implementation and tests.\n3. Identify existing conventions and similar behavior.\n4. Determine the smallest coherent change.\n\nDuring implementation:\n\n- modify only what is necessary for the task;\n- preserve existing architecture and public contracts;\n- avoid unrelated cleanup;\n- add or update tests when behavior changes;\n- run the strongest relevant validation reasonably available;\n- never change Git state or history.\n\nWhen finished, report:\n\n## Changes\n- files changed;\n- behavior implemented.\n\n## Validation\n- tests added or changed;\n- commands executed;\n- results.\n\n## Open issues\n- risks;\n- limitations;\n- decisions that still require review.\n',
+    reviewer: '---\ndescription: Reviews the staged candidate for correctness, regressions, security, design, and missing tests without modifying files.\nmode: subagent\nmodel: "{{CLAUDE_MODEL}}"\npermissions:\n  - action: read\n    resource: "*"\n    effect: allow\n\n  - action: edit\n    resource: "*"\n    effect: deny\n\n  - action: shell\n    resource: "*"\n    effect: deny\n\n  - action: shell\n    resource: "git status*"\n    effect: allow\n\n  - action: shell\n    resource: "git diff*"\n    effect: allow\n\n  - action: shell\n    resource: "git log*"\n    effect: allow\n\n  - action: shell\n    resource: "git show*"\n    effect: allow\n---\n\nYou are the independent senior reviewer for this repository.\n\nAlways follow `AGENTS.md`.\n\nDo not modify any file.\n\nYour primary review target is the staged candidate:\n\n`git diff --cached`\n\nYou may read additional files only when context is required to evaluate the diff correctly.\n\nReview for:\n\n1. Functional correctness.\n2. Bugs and regressions.\n3. Edge cases.\n4. Architecture and design violations.\n5. Maintainability problems.\n6. Security issues.\n7. Error-handling problems.\n8. Unnecessary duplication.\n9. Missing or insufficient tests.\n10. Changes outside the requested scope.\n11. Violations of `AGENTS.md`.\n\nOrder findings by severity:\n\n- CRITICAL\n- HIGH\n- MEDIUM\n- LOW\n\nFor every finding provide:\n\n- file;\n- approximate location;\n- problem;\n- consequence;\n- recommended correction.\n\nDo not invent issues merely to produce feedback.\n\nIf there are no relevant findings, end exactly with:\n\nREVIEW APPROVED\n',
+    documenter: '---\ndescription: Produces development-log reports from immutable interval diffs and may update project documentation only when explicitly requested.\nmode: subagent\nmodel: "{{GEMINI_MODEL}}"\npermissions:\n  - action: read\n    resource: "*"\n    effect: allow\n\n  - action: edit\n    resource: "*"\n    effect: deny\n\n  - action: edit\n    resource: "README.md"\n    effect: allow\n\n  - action: edit\n    resource: "docs/**"\n    effect: allow\n\n  - action: shell\n    resource: "*"\n    effect: deny\n---\n\nYou are the repository Documenter.\n\nAlways follow:\n\n- `AGENTS.md`\n- `docs/development-logs/README.md`\n\nFor automatic development logs, your source of truth is the immutable interval diff supplied by the external monitor.\n\nDo not reconstruct the interval from conversation memory.\nDo not use `git diff HEAD` as a substitute for the supplied interval diff.\nDo not read the entire repository by default.\n\nUse progressive disclosure:\n\n1. Read the supplied S0 → S1 diff.\n2. Read the supplied final-status metadata and affected-file list.\n3. Read only directly affected files when the diff is insufficient.\n4. Read directly related interfaces, contracts, tests, or task context only when necessary.\n5. Stop expanding context once there is enough evidence.\n\nFor interval logs:\n\n- write exactly one report at the target path provided by the monitor;\n- do not create a report when the monitor says there are no relevant changes;\n- describe functional, structural, configuration, or behavioral changes;\n- omit mechanical noise;\n- never invent motives, test results, effects, or design decisions;\n- never include credentials, tokens, secrets, authorization headers, or private keys;\n- if verification evidence is absent, write `Not verified`;\n- never modify source code or tests.\n\nThe development-log output itself must never become input to a later interval.\n\nWhen explicitly asked to update normal project documentation, you may modify:\n\n- `README.md`\n- `docs/**`\n\nDo not modify any other path.\n'
+  };
+
+  const defaults = {
+    codex: 'openai/REPLACE_WITH_REAL_ID',
+    claude: 'anthropic/REPLACE_WITH_REAL_ID',
+    gemini: 'google/REPLACE_WITH_REAL_ID'
+  };
+
+  const modelKey = 'guia-opencode-v2-models-v2';
+  const stored = JSON.parse(localStorage.getItem(modelKey) || '{}');
+  const inputs = [...document.querySelectorAll('[data-model-input]')];
+
+  inputs.forEach(input => {
+    const name = input.dataset.modelInput;
+    input.value = stored[name] || defaults[name];
+    input.addEventListener('input', renderModels);
+  });
+
+  function renderModels() {
+    const values = {};
+    inputs.forEach(input => {
+      const name = input.dataset.modelInput;
+      values[name] = input.value.trim() || defaults[name];
+    });
+
+    localStorage.setItem(modelKey, JSON.stringify(values));
+
+    const rendered = {
+      implementer: templates.implementer.replace('{{CODEX_MODEL}}', values.codex),
+      reviewer: templates.reviewer.replace('{{CLAUDE_MODEL}}', values.claude),
+      documenter: templates.documenter.replace('{{GEMINI_MODEL}}', values.gemini)
+    };
+
+    Object.entries(rendered).forEach(([name, text]) => {
+      const el = document.querySelector(`[data-template="${name}"]`);
+      if (el) el.textContent = text;
+    });
+  }
+
+  renderModels();
+})();
+</script>
+</body>
+</html>

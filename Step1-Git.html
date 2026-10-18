@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guía interactiva — Git + GitHub sin GitHub Actions</title>
+<style>
+:root {
+  --bg:#0b0d10; --panel:#11151a; --panel2:#161b22; --text:#e7edf3; --muted:#9aa7b4;
+  --line:#27313c; --accent:#65b8ff; --ok:#62d394; --warn:#f4c15d; --bad:#ff7b72;
+  --code:#090b0e; --shadow:0 14px 36px rgba(0,0,0,.28); --purple:#c9a7ff;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 Inter,Segoe UI,system-ui,sans-serif}
+a{color:var(--accent)}
+header{position:sticky;top:0;z-index:20;background:rgba(11,13,16,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top{max-width:1180px;margin:auto;padding:12px 22px;display:flex;gap:16px;align-items:center}
+.brand{font-weight:800;white-space:nowrap}
+.progress-wrap{flex:1;height:10px;background:#202731;border-radius:999px;overflow:hidden}
+.progress{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--ok));transition:.25s}
+#progressText{font-variant-numeric:tabular-nums;color:var(--muted);min-width:72px;text-align:right}
+button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:8px;padding:8px 11px;cursor:pointer}
+button:hover{border-color:#4b5c6e}
+main{max-width:1180px;margin:auto;padding:30px 22px 70px}
+.hero{padding:26px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,#111820,#0f1318);box-shadow:var(--shadow)}
+h1{font-size:clamp(28px,4vw,46px);line-height:1.05;margin:0 0 12px}
+h2{margin:0;font-size:23px}
+h3{margin:22px 0 8px;font-size:17px}
+h4{margin:18px 0 6px;font-size:15px;color:#cbd6e1}
+p{margin:8px 0}
+ul,ol{padding-left:22px}
+li{margin:5px 0}
+.muted{color:var(--muted)}
+.badge{display:inline-block;padding:4px 9px;border-radius:999px;background:#182531;border:1px solid #284660;color:#9ed1ff;font-size:12px;font-weight:700;margin-right:7px;margin-bottom:5px}
+.badge.git{background:#2a1b17;border-color:#603226;color:#ffb59d}
+.badge.github{background:#1c1c25;border-color:#42425e;color:#d5d5f4}
+.badge.safe{background:#102219;border-color:#245d3b;color:#9ee7bd}
+.callout{margin:16px 0;padding:14px 16px;border-left:4px solid var(--accent);background:#101820;border-radius:0 10px 10px 0}
+.callout.warn{border-color:var(--warn);background:#1a1710}
+.callout.ok{border-color:var(--ok);background:#101a15}
+.callout.bad{border-color:var(--bad);background:#1d1111}
+.callout.purple{border-color:var(--purple);background:#17121e}
+.assumptions{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:18px}
+.assumption{padding:11px 13px;background:var(--panel2);border:1px solid var(--line);border-radius:10px}
+nav.toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin:24px 0}
+nav.toc a{text-decoration:none;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text)}
+nav.toc a:hover{border-color:var(--accent)}
+.section{margin:22px 0;border:1px solid var(--line);border-radius:14px;background:var(--panel);overflow:hidden}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 18px;background:#121820;border-bottom:1px solid var(--line)}
+.section-body{padding:18px}
+.step{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(220px,.65fr);gap:10px;padding:12px 0;border-bottom:1px dashed #242d37}
+.step:last-child{border-bottom:0}
+.step input[type=checkbox]{width:18px;height:18px;margin-top:3px;accent-color:var(--ok)}
+.step-main strong{display:block;margin-bottom:3px}
+.note{color:var(--muted);font-size:13px;border-left:2px solid #334250;padding-left:10px}
+.codebox{position:relative;margin:10px 0 16px;background:var(--code);border:1px solid #242d37;border-radius:10px;overflow:hidden}
+.codehead{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#11161c;border-bottom:1px solid #242d37;color:var(--muted);font-size:12px}
+pre{margin:0;padding:14px;overflow:auto;white-space:pre;tab-size:2}
+.codebox.long pre{max-height:520px;overflow:auto}
+code{font:13px/1.5 Consolas,"Cascadia Code",monospace}
+.path{font-family:Consolas,"Cascadia Code",monospace;color:#b6dcff}
+.copy{font-size:12px;padding:5px 8px}
+.flow{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin:16px 0}
+.node{padding:9px 11px;border:1px solid var(--line);background:var(--panel2);border-radius:8px}
+.node.local{border-color:#5a3c33;background:#201612}
+.node.remote{border-color:#41415c;background:#171720}
+.node.good{border-color:#285e40;background:#111e16}
+.arrow{color:var(--muted);font-size:20px}
+.state-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:14px 0}
+.state{padding:15px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.state b{display:block;font-size:16px;margin-bottom:4px}
+.decision{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:14px 0}
+.choice{padding:13px;border:1px solid var(--line);border-radius:10px;background:#10151b}
+.choice strong{color:#c9e5ff}
+table{width:100%;border-collapse:collapse;margin:12px 0}
+th,td{border:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{background:#141b22}
+.small{font-size:13px}
+.kbd{display:inline-block;padding:1px 6px;border:1px solid #3b4652;border-bottom-width:2px;border-radius:5px;background:#151a20;font:12px Consolas,monospace;color:#dbe7f2}
+.footer{margin-top:34px;color:var(--muted);font-size:13px}
+
+.part-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:24px 0}
+.part-card{display:block;text-decoration:none;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text)}
+.part-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.part-card b{display:block;font-size:17px;margin-bottom:5px}
+.part-card span{color:var(--muted);font-size:13px}
+.part-divider{margin:36px 0 18px;padding:22px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,#111820,#0f1318);box-shadow:var(--shadow);scroll-margin-top:85px}
+.part-divider.flow-part{border-left:5px solid var(--ok)}
+.part-divider.tools-part{border-left:5px solid var(--accent)}
+.part-divider.errors-part{border-left:5px solid var(--bad)}
+.part-kicker{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:800}
+.part-divider h2{margin:4px 0 8px;font-size:28px}
+.part-divider p{color:var(--muted);max-width:900px}
+.toc-block{margin:16px 0 24px;padding:15px;border:1px solid var(--line);border-radius:12px;background:#0f1318}
+.toc-block h3{margin:0 0 10px;font-size:15px}
+.toc-block.flow-toc h3{color:var(--ok)}
+.toc-block.tools-toc h3{color:var(--accent)}
+.toc-block.errors-toc h3{color:var(--bad)}
+.toc-block nav.toc{margin:0}
+.error-table td:first-child{font-family:Consolas,"Cascadia Code",monospace;color:#ffd2cf;min-width:220px}
+@media(max-width:800px){.part-nav{grid-template-columns:1fr}}
+
+@media(max-width:800px){
+  .step{grid-template-columns:28px 1fr}
+  .note{grid-column:2}
+  .top{flex-wrap:wrap}
+  .progress-wrap{order:3;flex-basis:100%}
+}
+@media print{
+  header,button{display:none!important}
+  body{background:white;color:black}
+  .section,.hero{box-shadow:none;border-color:#bbb}
+  .section{break-inside:avoid}
+  .note,.muted{color:#444}
+  pre{white-space:pre-wrap}
+}
+</style>
+</head>
+<body>
+<header>
+<div class="top">
+  <div class="brand">Git × GitHub</div>
+  <div class="progress-wrap"><div class="progress" id="progress"></div></div>
+  <div id="progressText">0 / 0</div>
+  <button id="reset">Reiniciar checklist</button>
+</div>
+</header>
+
+<main>
+<section class="hero">
+  <span class="badge git">Git</span><span class="badge github">GitHub</span><span class="badge">Windows / PowerShell</span><span class="badge safe">Sin GitHub Actions</span>
+  <h1>Guía interactiva: Git + GitHub sin GitHub Actions</h1>
+  <p class="muted">Guía organizada en tres capas: flujo normal de trabajo, operaciones útiles de Git y banco de errores/recuperación.</p>
+
+  <div class="assumptions">
+    <div class="assumption"><strong>✓ Tú controlas Git</strong><br><span class="muted">Los comandos se ejecutan conscientemente; no automatizamos commits ni merges.</span></div>
+    <div class="assumption"><strong>✓ Rama principal: main</strong><br><span class="muted">La guía usa <span class="path">main</span> como rama principal.</span></div>
+    <div class="assumption"><strong>✓ Flujo con ramas</strong><br><span class="muted">El trabajo normal no se desarrolla directamente sobre <span class="path">main</span>.</span></div>
+    <div class="assumption"><strong>✓ GitHub como remoto</strong><br><span class="muted">Los Pull Requests y reviews viven en GitHub; los commits y ramas pertenecen a Git.</span></div>
+  </div>
+
+  <div class="callout ok"><strong>Objetivo final:</strong> interiorizar un ciclo estable: <strong>sincronizar main → crear rama → trabajar → inspeccionar → stage → commit → push → Pull Request → review → merge → actualizar main → eliminar rama</strong>.</div>
+  <div class="callout warn"><strong>Regla de seguridad:</strong> esta guía evita recomendar <span class="path">git reset --hard</span>, <span class="path">git clean -fd</span> y force push como operaciones normales. Son herramientas válidas, pero destructivas si todavía no entiendes exactamente qué van a borrar o reescribir.</div>
+</section>
+
+<div class="part-nav">
+  <a class="part-card" href="#part-flujo"><b>1 · Flujo normal de trabajo</b><span>La rutina que debes acabar interiorizando: crear repo, rama, commits, PR, merge y limpieza.</span></a>
+  <a class="part-card" href="#part-herramientas"><b>2 · Cosas que podemos hacer con Git</b><span>Operaciones útiles que no forman necesariamente parte de cada ciclo diario.</span></a>
+  <a class="part-card" href="#part-errores"><b>3 · Banco de errores</b><span>Diagnóstico y recuperación cuando el flujo normal se rompe.</span></a>
+</div>
+
+<div class="toc-block flow-toc">
+  <h3>Flujo normal de trabajo</h3>
+  <nav class="toc">
+    <a href="#s0">0 · Modelo mental</a>
+    <a href="#s1">1 · Preparar Git</a>
+    <a href="#s2">2 · Iniciar repositorio</a>
+    <a href="#s3">3 · .gitignore</a>
+    <a href="#s4">4 · Primer commit</a>
+    <a href="#s5">5 · Crear GitHub remoto</a>
+    <a href="#s6">6 · Conectar origin</a>
+    <a href="#s7">7 · Crear rama</a>
+    <a href="#s8">8 · Inspeccionar cambios</a>
+    <a href="#s9">9 · Stage</a>
+    <a href="#s10">10 · Commit</a>
+    <a href="#s11">11 · Push de rama</a>
+    <a href="#s12">12 · Pull Request</a>
+    <a href="#s13">13 · Review y correcciones</a>
+    <a href="#s14">14 · Merge</a>
+    <a href="#s15">15 · Sincronizar main</a>
+    <a href="#s16">16 · Borrar rama</a>
+    <a href="#s23">17 · Flujo diario completo</a>
+  </nav>
+</div>
+
+<div class="toc-block tools-toc">
+  <h3>Cosas que podemos hacer con Git</h3>
+  <nav class="toc">
+    <a href="#s17">18 · fetch, pull y push</a>
+    <a href="#s19">19 · Stash</a>
+    <a href="#s21">20 · Archivos ya trackeados</a>
+    <a href="#s22">21 · Clonar repositorio</a>
+    <a href="#s25">22 · Chuleta de operaciones</a>
+  </nav>
+</div>
+
+<div class="toc-block errors-toc">
+  <h3>Banco de errores y recuperación</h3>
+  <nav class="toc">
+    <a href="#s18">23 · Conflictos</a>
+    <a href="#s20">24 · Deshacer sin destrozar</a>
+    <a href="#s24">25 · Diagnóstico + banco de errores</a>
+  </nav>
+</div>
+
+<section class="part-divider flow-part" id="part-flujo">
+  <div class="part-kicker">Bloque 1</div>
+  <h2>Flujo normal de trabajo</h2>
+  <p>Este es el camino principal. Si todo va bien, tu trabajo debería moverse por estas secciones de arriba abajo. Es la parte que interesa automatizar mentalmente.</p>
+</section>
+
+<section class="section" id="s0">
+<div class="section-head"><h2>0. Modelo mental: qué mueve realmente Git</h2></div>
+<div class="section-body">
+  <p>Antes de memorizar comandos, memoriza los <strong>estados</strong>. Git no es “guardar en GitHub”. Git trabaja primero en tu máquina.</p>
+
+  <div class="flow">
+    <span class="node local">Working tree</span><span class="arrow">→ git add →</span>
+    <span class="node local">Staging area</span><span class="arrow">→ git commit →</span>
+    <span class="node local">Repositorio local</span><span class="arrow">→ git push →</span>
+    <span class="node remote">GitHub / origin</span>
+  </div>
+
+  <div class="state-grid">
+    <div class="state"><b>Working tree</b>Los archivos tal como existen ahora mismo en tu carpeta.</div>
+    <div class="state"><b>Staging area / index</b>La selección exacta de cambios que entrará en el próximo commit.</div>
+    <div class="state"><b>Commit</b>Una fotografía identificada del estado seleccionado. Vive en tu repositorio local.</div>
+    <div class="state"><b>Remote</b>Otra copia del repositorio. En esta guía el remoto principal se llama <span class="path">origin</span> y vive en GitHub.</div>
+  </div>
+
+  <div class="callout"><strong>Idea crítica:</strong> <span class="path">git add</span> no “sube” nada a GitHub. <span class="path">git commit</span> tampoco. Solo <span class="path">git push</span> envía commits al remoto.</div>
+
+  <div class="flow">
+    <span class="node">main actualizado</span><span class="arrow">→</span>
+    <span class="node">feature/... </span><span class="arrow">→</span>
+    <span class="node">cambios</span><span class="arrow">→</span>
+    <span class="node">stage</span><span class="arrow">→</span>
+    <span class="node">commit</span><span class="arrow">→</span>
+    <span class="node">push</span><span class="arrow">→</span>
+    <span class="node">PR</span><span class="arrow">→</span>
+    <span class="node">merge</span>
+  </div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Distingo Git de GitHub.</strong>Git gestiona historial, ramas, commits y merges. GitHub aloja el remoto y añade Pull Requests, review e interfaz colaborativa.</div><div class="note">Un repositorio Git funciona perfectamente sin GitHub.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Entiendo los tres estados locales.</strong>Working tree → staging → commit.</div><div class="note">Si esta cadena está clara, la mayoría de comandos dejan de parecer arbitrarios.</div></div>
+</div>
+</section>
+
+<section class="section" id="s1">
+<div class="section-head"><h2>1. Preparar Git una sola vez en tu equipo</h2></div>
+<div class="section-body">
+  <h3>1.1 Comprobar instalación</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git --version</code></pre></div>
+
+  <h3>1.2 Configurar identidad global</h3>
+  <div class="codebox"><div class="codehead">PowerShell — sustituye tus datos <button class="copy">Copiar</button></div><pre><code>git config --global user.name "Tu Nombre"
+git config --global user.email "tu-email@example.com"</code></pre></div>
+
+  <h3>1.3 Usar main como nombre por defecto</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git config --global init.defaultBranch main</code></pre></div>
+
+  <h3>1.4 Ver la configuración efectiva</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git config --global --list</code></pre></div>
+
+  <div class="callout warn"><strong>El email importa:</strong> si quieres que GitHub asocie tus commits a tu cuenta, usa un email reconocido por GitHub o el email <em>noreply</em> que GitHub te proporciona.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong><span class="path">git --version</span> responde correctamente.</strong></div><div class="note">Si no, instala Git antes de continuar.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Mi nombre y email globales son correctos.</strong></div><div class="note">Se incrustan en los commits nuevos.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>La rama inicial por defecto será <span class="path">main</span>.</strong></div><div class="note">Evita tener que renombrarla en cada repositorio nuevo.</div></div>
+</div>
+</section>
+
+<section class="section" id="s2">
+<div class="section-head"><h2>2. Convertir una carpeta normal en repositorio Git</h2></div>
+<div class="section-body">
+  <p>Sitúate en la raíz real del proyecto. No inicialices Git desde una carpeta padre por accidente.</p>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>cd "C:\ruta\a\tu\proyecto"
+git init</code></pre></div>
+
+  <div class="codebox"><div class="codehead">Comprobación <button class="copy">Copiar</button></div><pre><code>git rev-parse --show-toplevel
+git status
+git branch --show-current</code></pre></div>
+
+  <div class="callout"><strong>Resultado esperado:</strong> aparece una carpeta oculta <span class="path">.git/</span>. Ahí vive la base de datos de Git. No la edites manualmente.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Estoy en la raíz correcta.</strong></div><div class="note"><span class="path">git rev-parse --show-toplevel</span> debe apuntar al proyecto, no a una carpeta superior.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>El repositorio está inicializado.</strong></div><div class="note"><span class="path">git status</span> ya reconoce el repositorio.</div></div>
+</div>
+</section>
+
+<section class="section" id="s3">
+<div class="section-head"><h2>3. Crear y revisar <span class="path">.gitignore</span> antes del primer commit</h2></div>
+<div class="section-body">
+  <p><span class="path">.gitignore</span> evita que Git empiece a seguir archivos que no deberían formar parte del repositorio. Para este flujo usaremos el siguiente archivo base para <strong>Spring Boot (Maven + Gradle) + OpenCode</strong>.</p>
+
+  <div class="codebox long"><div class="codehead">.gitignore — base del proyecto <button class="copy">Copiar</button></div><pre><code># =====================================================
+# Spring Boot (Maven + Gradle) + OpenCode
+# =====================================================
+
+# ---------- Maven ----------
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# ---------- Gradle ----------
+.gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# ---------- Compilados y paquetes ----------
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+
+# Los wrappers SÍ se versionan
+!gradle/wrapper/gradle-wrapper.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ---------- IntelliJ IDEA ----------
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# ---------- Eclipse / STS ----------
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+
+# ---------- NetBeans ----------
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# ---------- VS Code ----------
+.vscode/
+
+# ---------- Secretos y configuración local ----------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+*.keystore
+application-local.properties
+application-local.yml
+application-local.yaml
+application-secret*.properties
+application-secret*.yml
+application-secret*.yaml
+
+# ---------- Logs y temporales ----------
+*.log
+logs/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- Bases de datos locales (H2 / SQLite en archivo) ----------
+*.mv.db
+*.trace.db
+*.h2.db
+*.sqlite
+*.sqlite3
+
+# ---------- Cobertura ----------
+coverage/
+jacoco*.exec
+*.lcov
+
+# ---------- Node (si hay front o herramientas) ----------
+node_modules/
+
+# =====================================================
+# OpenCode
+# =====================================================
+# SE VERSIONAN (no los ignores): AGENTS.md, opencode.jsonc,
+# .opencode/agents/, .opencode/commands/, docs/development-logs/
+# y tools/opencode/
+
+# Dependencias que OpenCode instala dentro de .opencode/
+.opencode/node_modules/
+.opencode/package.json
+.opencode/package-lock.json
+.opencode/bun.lock
+.opencode/bun.lockb
+
+# Configuración personal que no quieres compartir
+opencode.local.json
+opencode.local.jsonc</code></pre></div>
+
+  <div class="callout ok"><strong>OpenCode:</strong> se versionan <span class="path">AGENTS.md</span>, <span class="path">opencode.jsonc</span>, <span class="path">.opencode/agents/</span>, <span class="path">.opencode/commands/</span>, <span class="path">docs/development-logs/</span> y <span class="path">tools/opencode/</span>. Solo se ignoran dependencias y configuración personal indicadas en el archivo.</div>
+  <div class="callout bad"><strong>No confíes ciegamente en el .gitignore:</strong> antes de cualquier commit revisa <span class="path">git status</span>. Un secreto añadido al historial deja de estar protegido por añadirlo después al <span class="path">.gitignore</span>.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He creado o revisado <span class="path">.gitignore</span>.</strong></div><div class="note">Este es el archivo base previsto para Spring Boot + OpenCode.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>No aparecen binarios, credenciales ni artefactos de build en <span class="path">git status</span>.</strong></div><div class="note">Corrígelo antes del primer <span class="path">git add</span>.</div></div>
+</div>
+</section>
+
+<section class="section" id="s4">
+<div class="section-head"><h2>4. Crear el primer commit</h2></div>
+<div class="section-body">
+  <h3>4.1 Ver qué existe</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git status</code></pre></div>
+
+  <h3>4.2 Añadir el contenido al staging area</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git add .</code></pre></div>
+
+  <h3>4.3 Revisar exactamente lo staged</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git status
+git diff --cached --stat
+git diff --cached</code></pre></div>
+
+  <h3>4.4 Crear el commit</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git commit -m "chore: initial project setup"</code></pre></div>
+
+  <h3>4.5 Comprobar</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git status
+git log --oneline --decorate -5</code></pre></div>
+
+  <div class="callout"><strong><span class="path">git add .</span> no es una revisión.</strong> Es solo una selección masiva. En trabajo normal aprenderás a preferir <span class="path">git add archivo</span> o <span class="path">git add -p</span> cuando el cambio sea heterogéneo.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He revisado el staged diff antes del commit.</strong></div><div class="note">El commit debe contener únicamente lo que pretendías guardar.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Existe el primer commit y el working tree queda limpio.</strong></div><div class="note">Idealmente <span class="path">git status</span> muestra “working tree clean”.</div></div>
+</div>
+</section>
+
+<section class="section" id="s5">
+<div class="section-head"><h2>5. Crear el repositorio remoto en GitHub</h2></div>
+<div class="section-body">
+  <ol>
+    <li>En GitHub, crea un repositorio nuevo.</li>
+    <li>Usa el nombre que quieras para el proyecto.</li>
+    <li>Elige público o privado según corresponda.</li>
+    <li><strong>No añadas README, .gitignore ni licencia desde GitHub</strong> si ya tienes un repositorio local con su primer commit.</li>
+    <li>Crea el repositorio vacío y copia su URL HTTPS o SSH.</li>
+  </ol>
+
+  <div class="callout warn"><strong>Por qué lo dejamos vacío:</strong> si GitHub crea su propio commit inicial y tu repositorio local ya tiene otro historial independiente, tendrás dos raíces distintas y complicas innecesariamente la primera sincronización.</div>
+
+  <div class="decision">
+    <div class="choice"><strong>HTTPS</strong><br>Más simple para empezar. Ejemplo: <span class="path">https://github.com/USUARIO/REPO.git</span>.</div>
+    <div class="choice"><strong>SSH</strong><br>Muy cómodo cuando ya tienes tus claves configuradas. Ejemplo: <span class="path">git@github.com:USUARIO/REPO.git</span>.</div>
+  </div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He creado un repositorio remoto vacío.</strong></div><div class="note">Sin README remoto ni otro commit inicial.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Tengo copiada la URL correcta del repositorio.</strong></div><div class="note">HTTPS y SSH son válidos; no mezcles URLs de otro proyecto.</div></div>
+</div>
+</section>
+
+<section class="section" id="s6">
+<div class="section-head"><h2>6. Conectar el repositorio local con GitHub</h2></div>
+<div class="section-body">
+  <h3>6.1 Añadir el remoto <span class="path">origin</span></h3>
+  <div class="codebox"><div class="codehead">HTTPS — sustituye la URL <button class="copy">Copiar</button></div><pre><code>git remote add origin https://github.com/USUARIO/REPOSITORIO.git</code></pre></div>
+
+  <h3>6.2 Comprobar el remoto</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git remote -v</code></pre></div>
+
+  <h3>6.3 Primer push y creación del upstream</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git push -u origin main</code></pre></div>
+
+  <div class="callout ok"><strong>Qué hace <span class="path">-u</span>:</strong> enlaza tu rama local <span class="path">main</span> con <span class="path">origin/main</span>. A partir de ahí, normalmente bastarán <span class="path">git push</span> y <span class="path">git pull</span> cuando estés en esa rama.</div>
+
+  <div class="codebox"><div class="codehead">Verificación <button class="copy">Copiar</button></div><pre><code>git status
+git branch -vv
+git remote -v</code></pre></div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong><span class="path">origin</span> apunta al repositorio correcto.</strong></div><div class="note">Compruébalo antes del primer push.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong><span class="path">main</span> ya rastrea <span class="path">origin/main</span>.</strong></div><div class="note"><span class="path">git branch -vv</span> muestra el upstream.</div></div>
+</div>
+</section>
+
+<section class="section" id="s7">
+<div class="section-head"><h2>7. Empezar una tarea correctamente: sincronizar main y crear rama</h2></div>
+<div class="section-body">
+  <p>Éste es el comienzo normal de una nueva funcionalidad, bugfix o refactor.</p>
+
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git switch main
+git pull
+git switch -c feature/nombre-corto</code></pre></div>
+
+  <h3>Convenciones útiles</h3>
+  <table>
+    <thead><tr><th>Tipo</th><th>Ejemplo</th><th>Uso</th></tr></thead>
+    <tbody>
+      <tr><td>feature</td><td><span class="path">feature/user-registration</span></td><td>Nueva funcionalidad.</td></tr>
+      <tr><td>fix</td><td><span class="path">fix/null-email-validation</span></td><td>Corrección de bug.</td></tr>
+      <tr><td>refactor</td><td><span class="path">refactor/order-service</span></td><td>Cambio interno sin nueva funcionalidad.</td></tr>
+      <tr><td>docs</td><td><span class="path">docs/api-usage</span></td><td>Documentación.</td></tr>
+      <tr><td>chore</td><td><span class="path">chore/update-gitignore</span></td><td>Mantenimiento.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout bad"><strong>No hagas trabajo normal directamente en <span class="path">main</span>.</strong> Para aprender un flujo limpio, considera <span class="path">main</span> una rama estable que recibe cambios integrados, no tu mesa de trabajo.</div>
+
+  <div class="codebox"><div class="codehead">Comprobación <button class="copy">Copiar</button></div><pre><code>git branch --show-current
+git status</code></pre></div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He actualizado <span class="path">main</span> antes de crear la rama.</strong></div><div class="note">Así la rama nace de la base más reciente.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Estoy trabajando en una rama dedicada.</strong></div><div class="note">Compruébalo antes de editar.</div></div>
+</div>
+</section>
+
+<section class="section" id="s8">
+<div class="section-head"><h2>8. Inspeccionar los cambios mientras trabajas</h2></div>
+<div class="section-body">
+  <h3>Estado resumido</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git status --short</code></pre></div>
+
+  <h3>Cambios todavía no staged</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git diff</code></pre></div>
+
+  <h3>Resumen por archivo</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git diff --stat</code></pre></div>
+
+  <h3>Historial reciente</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git log --oneline --decorate --graph -10</code></pre></div>
+
+  <div class="callout"><strong>Hábito que debes adquirir:</strong> ejecuta <span class="path">git status</span> constantemente. No modifica nada y te dice dónde estás y qué estado tiene cada archivo.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Reconozco mis archivos modificados, nuevos y eliminados.</strong></div><div class="note">No continúes si aparece un cambio que no entiendes.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He leído el diff real, no solo la lista de archivos.</strong></div><div class="note">El nombre de un archivo no te dice qué vas a commitear.</div></div>
+</div>
+</section>
+
+<section class="section" id="s9">
+<div class="section-head"><h2>9. Preparar el candidato a commit: staging</h2></div>
+<div class="section-body">
+  <h3>Añadir un archivo concreto</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git add ruta/al/archivo.java</code></pre></div>
+
+  <h3>Añadir varios archivos concretos</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git add archivo1.java archivo2.java</code></pre></div>
+
+  <h3>Seleccionar fragmentos interactivos</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git add -p</code></pre></div>
+
+  <h3>Añadir todo lo actual</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git add .</code></pre></div>
+
+  <h3>Revisar el candidato exacto</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git status
+git diff --cached --stat
+git diff --cached</code></pre></div>
+
+  <div class="callout purple"><strong>Distinción que debes interiorizar:</strong> <span class="path">git diff</span> muestra cambios no staged. <span class="path">git diff --cached</span> muestra lo que entrará en el próximo commit.</div>
+
+  <h3>Sacar un archivo del staging sin borrar su modificación</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git restore --staged ruta/al/archivo.java</code></pre></div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>El staging contiene una unidad lógica de trabajo.</strong></div><div class="note">Un commit no debería mezclar una feature, un refactor ajeno y cambios de formato accidentales.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He revisado <span class="path">git diff --cached</span>.</strong></div><div class="note">Éste es tu candidato real al commit.</div></div>
+</div>
+</section>
+
+<section class="section" id="s10">
+<div class="section-head"><h2>10. Crear commits útiles</h2></div>
+<div class="section-body">
+  <h3>Commit básico</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git commit -m "feat: add user registration endpoint"</code></pre></div>
+
+  <h3>Ejemplos de mensajes</h3>
+  <table>
+    <thead><tr><th>Mensaje</th><th>Lectura</th></tr></thead>
+    <tbody>
+      <tr><td><span class="path">feat: add password reset endpoint</span></td><td>Nueva funcionalidad.</td></tr>
+      <tr><td><span class="path">fix: reject blank customer email</span></td><td>Corrección funcional.</td></tr>
+      <tr><td><span class="path">test: cover duplicate email case</span></td><td>Tests.</td></tr>
+      <tr><td><span class="path">refactor: extract order mapper</span></td><td>Reorganización interna.</td></tr>
+      <tr><td><span class="path">docs: document local setup</span></td><td>Documentación.</td></tr>
+      <tr><td><span class="path">chore: ignore local env files</span></td><td>Mantenimiento.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout ok"><strong>Un buen commit es pequeño, coherente y explicable.</strong> No necesitas convertir cada línea en un commit, pero sí poder responder “¿qué cambia este commit y por qué existe?”.</div>
+
+  <h3>Comprobar después</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git status
+git log --oneline --decorate -5
+git show --stat HEAD</code></pre></div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>El mensaje describe el efecto del commit.</strong></div><div class="note">Evita mensajes como <span class="path">changes</span>, <span class="path">fix stuff</span> o <span class="path">final</span>.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>El commit contiene solo cambios relacionados.</strong></div><div class="note">Si no, usa staging selectivo la próxima vez.</div></div>
+</div>
+</section>
+
+<section class="section" id="s11">
+<div class="section-head"><h2>11. Publicar tu rama en GitHub</h2></div>
+<div class="section-body">
+  <p>La primera vez que subes una rama local nueva, crea su upstream remoto.</p>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git push -u origin feature/nombre-corto</code></pre></div>
+
+  <p>Después, mientras sigas en esa misma rama:</p>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git push</code></pre></div>
+
+  <h3>Comprobar tracking</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git branch -vv
+git status</code></pre></div>
+
+  <div class="callout"><strong>Push no crea un Pull Request.</strong> Solo publica commits y actualiza la rama remota. El PR es una operación aparte en GitHub.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>La rama está publicada en <span class="path">origin</span>.</strong></div><div class="note">Debe aparecer en GitHub.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>La rama local tiene upstream.</strong></div><div class="note">Así los siguientes <span class="path">git push</span> son simples.</div></div>
+</div>
+</section>
+
+<section class="section" id="s12">
+<div class="section-head"><h2>12. Abrir un Pull Request en GitHub</h2></div>
+<div class="section-body">
+  <p>En GitHub, crea un Pull Request con:</p>
+  <div class="flow">
+    <span class="node remote">base: main</span><span class="arrow">← recibe cambios de ←</span><span class="node remote">compare: feature/nombre-corto</span>
+  </div>
+
+  <h3>Antes de pulsar “Create pull request”</h3>
+  <ul>
+    <li>Lee la pestaña <strong>Files changed</strong>.</li>
+    <li>Confirma que no hay archivos accidentales.</li>
+    <li>Comprueba que el PR tiene un objetivo único.</li>
+    <li>Escribe un título que describa el resultado.</li>
+    <li>Explica qué cambia y cómo se validó.</li>
+  </ul>
+
+  <h3>Plantilla mental mínima</h3>
+  <div class="codebox"><div class="codehead">Descripción del Pull Request <button class="copy">Copiar</button></div><pre><code>## Qué cambia
+- ...
+
+## Por qué
+- ...
+
+## Validación
+- ...
+
+## Notas
+- ...</code></pre></div>
+
+  <div class="callout warn"><strong>No uses el Pull Request como papelera de todo lo hecho durante varios días.</strong> Si la comparación es enorme y mezcla objetivos, el problema empezó antes: la rama o los commits tienen demasiado alcance.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Base y compare son correctas.</strong></div><div class="note">Normalmente <span class="path">main ← feature/...</span>.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He revisado “Files changed”.</strong></div><div class="note">Es la última revisión visual antes del review formal.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>El PR explica cambio, motivo y validación.</strong></div><div class="note">No obligues al revisor a reconstruir el contexto.</div></div>
+</div>
+</section>
+
+<section class="section" id="s13">
+<div class="section-head"><h2>13. Review: corregir sin abrir otro Pull Request</h2></div>
+<div class="section-body">
+  <p>Si el review detecta algo, <strong>continúas trabajando en la misma rama</strong>. El Pull Request se actualiza automáticamente cuando haces nuevos pushes a esa rama.</p>
+
+  <div class="flow">
+    <span class="node">review</span><span class="arrow">→</span>
+    <span class="node">corregir local</span><span class="arrow">→</span>
+    <span class="node">git add</span><span class="arrow">→</span>
+    <span class="node">git commit</span><span class="arrow">→</span>
+    <span class="node">git push</span><span class="arrow">→</span>
+    <span class="node remote">mismo PR actualizado</span>
+  </div>
+
+  <div class="codebox"><div class="codehead">PowerShell — ciclo de corrección <button class="copy">Copiar</button></div><pre><code>git status
+git diff
+# corrige los archivos
+git add ruta/al/archivo
+git diff --cached
+git commit -m "fix: address review feedback"
+git push</code></pre></div>
+
+  <div class="callout ok"><strong>No necesitas cerrar y recrear el PR.</strong> Un PR compara ramas, no “un commit concreto”. Mientras empujes a la misma rama de origen, GitHub recalcula la comparación.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Las correcciones se han hecho en la misma rama del PR.</strong></div><div class="note">El PR debe actualizarse automáticamente.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He vuelto a revisar el diff y la validación.</strong></div><div class="note">Una corrección también puede introducir regresiones.</div></div>
+</div>
+</section>
+
+<section class="section" id="s14">
+<div class="section-head"><h2>14. Integrar el Pull Request: merge</h2></div>
+<div class="section-body">
+  <p>Cuando el PR esté aprobado y listo, GitHub suele ofrecer varias estrategias. Para proyectos personales o educativos, conviene entenderlas en vez de pulsar la primera opción.</p>
+
+  <table>
+    <thead><tr><th>Estrategia</th><th>Qué hace</th><th>Cuándo tiene sentido</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Create a merge commit</strong></td><td>Conserva los commits de la rama y crea un commit de merge.</td><td>Quieres preservar explícitamente la topología de ramas.</td></tr>
+      <tr><td><strong>Squash and merge</strong></td><td>Combina todo el PR en un único commit sobre <span class="path">main</span>.</td><td>Muy práctico cuando los commits intermedios son ruidosos y el PR representa una sola unidad lógica.</td></tr>
+      <tr><td><strong>Rebase and merge</strong></td><td>Reaplica los commits de la rama linealmente sobre <span class="path">main</span>.</td><td>Quieres historial lineal conservando commits individuales.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout purple"><strong>Para empezar:</strong> si cada Pull Request representa una tarea bien delimitada, <strong>Squash and merge</strong> suele producir un historial sencillo de leer. Pero no es una ley universal; sigue la convención del proyecto cuando exista.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>El PR está revisado y validado antes de mergear.</strong></div><div class="note">Merge no sustituye review ni tests.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Entiendo qué estrategia de merge estoy usando.</strong></div><div class="note">No elijas por inercia.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>El Pull Request aparece como merged.</strong></div><div class="note">Ahora el cambio existe en <span class="path">origin/main</span>.</div></div>
+</div>
+</section>
+
+<section class="section" id="s15">
+<div class="section-head"><h2>15. Después del merge: actualizar tu main local</h2></div>
+<div class="section-body">
+  <p>El merge que hiciste en GitHub modifica el remoto. Tu <span class="path">main</span> local no se actualiza mágicamente.</p>
+
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git switch main
+git pull</code></pre></div>
+
+  <div class="codebox"><div class="codehead">Comprobar <button class="copy">Copiar</button></div><pre><code>git status
+git log --oneline --decorate --graph -10</code></pre></div>
+
+  <div class="callout ok"><strong>Estado objetivo:</strong> <span class="path">main</span> local y <span class="path">origin/main</span> apuntan al mismo estado, y tu working tree está limpio.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He vuelto a <span class="path">main</span>.</strong></div><div class="note">No continúes indefinidamente sobre una rama ya mergeada.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Mi <span class="path">main</span> local está actualizado.</strong></div><div class="note">Es la base de la próxima rama.</div></div>
+</div>
+</section>
+
+<section class="section" id="s16">
+<div class="section-head"><h2>16. Cerrar el ciclo: eliminar la rama ya integrada</h2></div>
+<div class="section-body">
+  <h3>Eliminar la rama local</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git branch -d feature/nombre-corto</code></pre></div>
+
+  <p>La opción <span class="path">-d</span> es deliberadamente conservadora: Git se niega si considera que la rama contiene trabajo no integrado.</p>
+
+  <h3>Eliminar la rama remota</h3>
+  <p>Si GitHub no la eliminó automáticamente al mergear:</p>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git push origin --delete feature/nombre-corto</code></pre></div>
+
+  <h3>Limpiar referencias remotas obsoletas</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git fetch --prune</code></pre></div>
+
+  <div class="callout warn"><strong>No uses <span class="path">git branch -D</span> por costumbre.</strong> La mayúscula fuerza el borrado aunque Git detecte trabajo no integrado. Úsala solo cuando sepas por qué la rama se puede descartar.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>La rama mergeada ya no existe localmente.</strong></div><div class="note">Evita acumular ramas muertas.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Las referencias remotas están limpias.</strong></div><div class="note"><span class="path">git fetch --prune</span> elimina referencias a ramas remotas que ya no existen.</div></div>
+</div>
+</section>
+
+<section class="section" id="s23">
+<div class="section-head"><h2>17. Flujo diario completo que debes interiorizar</h2></div>
+<div class="section-body">
+  <h3>A. Empezar una tarea</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git switch main
+git pull
+git switch -c feature/nombre-corto</code></pre></div>
+
+  <h3>B. Trabajar e inspeccionar</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git status
+git diff</code></pre></div>
+
+  <h3>C. Preparar un commit</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git add ruta/al/archivo
+git diff --cached
+git commit -m "feat: describe the change"</code></pre></div>
+
+  <h3>D. Repetir commits si la tarea lo necesita</h3>
+  <div class="flow">
+    <span class="node">editar</span><span class="arrow">→</span><span class="node">status/diff</span><span class="arrow">→</span><span class="node">add</span><span class="arrow">→</span><span class="node">diff --cached</span><span class="arrow">→</span><span class="node">commit</span>
+  </div>
+
+  <h3>E. Publicar la rama</h3>
+  <div class="codebox"><div class="codehead">Primera vez <button class="copy">Copiar</button></div><pre><code>git push -u origin feature/nombre-corto</code></pre></div>
+
+  <div class="codebox"><div class="codehead">Pusheos siguientes <button class="copy">Copiar</button></div><pre><code>git push</code></pre></div>
+
+  <h3>F. GitHub</h3>
+  <div class="flow">
+    <span class="node remote">Abrir PR</span><span class="arrow">→</span>
+    <span class="node remote">Revisar Files changed</span><span class="arrow">→</span>
+    <span class="node remote">Review</span><span class="arrow">→</span>
+    <span class="node remote">Corregir + push si hace falta</span><span class="arrow">→</span>
+    <span class="node remote">Merge</span>
+  </div>
+
+  <h3>G. Cerrar el ciclo local</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git switch main
+git pull
+git branch -d feature/nombre-corto
+git fetch --prune</code></pre></div>
+
+  <div class="callout ok"><strong>Ésta es la rutina que deberías acabar haciendo casi de memoria.</strong> Las demás secciones existen para entenderla y para recuperarte cuando el camino normal se rompe.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Puedo explicar cada transición del flujo sin mirar la guía.</strong></div><div class="note">No basta con repetir comandos: debes saber qué estado cambia cada uno.</div></div>
+</div>
+</section>
+
+<section class="part-divider tools-part" id="part-herramientas">
+  <div class="part-kicker">Bloque 2</div>
+  <h2>Cosas que podemos hacer con Git</h2>
+  <p>Operaciones útiles que amplían tu caja de herramientas. No tienes que ejecutarlas en cada tarea: las usas cuando la situación lo requiere.</p>
+</section>
+
+<section class="section" id="s17">
+<div class="section-head"><h2>18. Entender <span class="path">fetch</span>, <span class="path">pull</span> y <span class="path">push</span></h2></div>
+<div class="section-body">
+  <table>
+    <thead><tr><th>Comando</th><th>Dirección</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><td><span class="path">git fetch</span></td><td>GitHub → datos locales de seguimiento</td><td>Descarga información del remoto sin integrar esos cambios en tu rama actual.</td></tr>
+      <tr><td><span class="path">git pull</span></td><td>GitHub → rama local</td><td>Obtiene cambios remotos e intenta integrarlos en la rama actual.</td></tr>
+      <tr><td><span class="path">git push</span></td><td>Repositorio local → GitHub</td><td>Publica commits locales que el remoto todavía no tiene.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Inspeccionar antes de integrar</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git fetch origin
+git status
+git log --oneline --graph --decorate --all -15</code></pre></div>
+
+  <div class="callout"><strong>Modelo corto:</strong> <span class="path">fetch</span> informa, <span class="path">pull</span> informa e integra, <span class="path">push</span> publica.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Sé cuándo prefiero <span class="path">fetch</span> a <span class="path">pull</span>.</strong></div><div class="note">Si quieres inspeccionar primero, usa <span class="path">fetch</span>.</div></div>
+</div>
+</section>
+
+<section class="section" id="s19">
+<div class="section-head"><h2>19. Apartar trabajo temporalmente con <span class="path">git stash</span></h2></div>
+<div class="section-body">
+  <p>Úsalo cuando necesitas dejar temporalmente el working tree limpio sin crear un commit artificial.</p>
+
+  <h3>Guardar cambios tracked</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git stash push -m "WIP: user registration"</code></pre></div>
+
+  <h3>Incluir también archivos untracked</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git stash push -u -m "WIP: user registration"</code></pre></div>
+
+  <h3>Ver stashes</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git stash list</code></pre></div>
+
+  <h3>Recuperar sin borrar la entrada</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git stash apply stash@{0}</code></pre></div>
+
+  <h3>Recuperar y eliminar la entrada si funciona</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git stash pop</code></pre></div>
+
+  <div class="callout warn"><strong>Stash no es un archivo permanente.</strong> No lo conviertas en un cementerio de trabajo olvidado. Si algo merece conservarse y explicarse, probablemente merece una rama y commits.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Uso stash solo como almacenamiento temporal.</strong></div><div class="note">Pon mensajes descriptivos si vas a tener más de uno.</div></div>
+</div>
+</section>
+
+<section class="section" id="s21">
+<div class="section-head"><h2>20. “Lo he añadido al .gitignore y Git sigue viéndolo”</h2></div>
+<div class="section-body">
+  <p><span class="path">.gitignore</span> afecta a archivos que Git todavía no rastrea. Si un archivo ya está trackeado, ignorarlo no lo saca del repositorio.</p>
+
+  <h3>Dejar de trackear un archivo sin borrarlo del disco</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git rm --cached ruta/al/archivo</code></pre></div>
+
+  <h3>Para una carpeta</h3>
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git rm -r --cached ruta/a/la/carpeta</code></pre></div>
+
+  <p>Después, confirma que la ruta está correctamente ignorada y crea un commit.</p>
+
+  <div class="callout bad"><strong>Si el archivo contenía un secreto y ya fue commiteado, quitarlo del estado actual no elimina el secreto del historial anterior.</strong> En ese caso debes considerar el secreto comprometido, rotarlo y limpiar el historial con un procedimiento específico.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Entiendo que “ignored” y “untracked” no significan lo mismo que “dejar de trackear”.</strong></div><div class="note">Git no olvida automáticamente un archivo que ya forma parte de su historial.</div></div>
+</div>
+</section>
+
+<section class="section" id="s22">
+<div class="section-head"><h2>21. Empezar desde un repositorio que ya existe: <span class="path">git clone</span></h2></div>
+<div class="section-body">
+  <p>Si el proyecto ya existe en GitHub, normalmente <strong>no</strong> haces <span class="path">git init</span> + <span class="path">remote add</span>. Lo clonas.</p>
+
+  <div class="codebox"><div class="codehead">PowerShell <button class="copy">Copiar</button></div><pre><code>git clone https://github.com/USUARIO/REPOSITORIO.git
+cd REPOSITORIO</code></pre></div>
+
+  <div class="codebox"><div class="codehead">Comprobar <button class="copy">Copiar</button></div><pre><code>git status
+git remote -v
+git branch -vv</code></pre></div>
+
+  <div class="callout"><strong>Clone ya hace varias cosas:</strong> crea la carpeta, copia el historial Git, configura <span class="path">origin</span> y prepara la rama inicial de trabajo.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Sé distinguir “proyecto local nuevo” de “repositorio remoto existente”.</strong></div><div class="note">Nuevo local: <span class="path">git init</span>. Existente remoto: <span class="path">git clone</span>.</div></div>
+</div>
+</section>
+
+<section class="section" id="s25">
+<div class="section-head"><h2>22. Chuleta final</h2></div>
+<div class="section-body">
+  <table>
+    <thead><tr><th>Quiero…</th><th>Comando</th></tr></thead>
+    <tbody>
+      <tr><td>Inicializar repositorio</td><td><span class="path">git init</span></td></tr>
+      <tr><td>Ver estado</td><td><span class="path">git status</span></td></tr>
+      <tr><td>Ver cambios no staged</td><td><span class="path">git diff</span></td></tr>
+      <tr><td>Stagear un archivo</td><td><span class="path">git add archivo</span></td></tr>
+      <tr><td>Stagear por fragmentos</td><td><span class="path">git add -p</span></td></tr>
+      <tr><td>Ver candidato al commit</td><td><span class="path">git diff --cached</span></td></tr>
+      <tr><td>Des-stagear</td><td><span class="path">git restore --staged archivo</span></td></tr>
+      <tr><td>Commit</td><td><span class="path">git commit -m "mensaje"</span></td></tr>
+      <tr><td>Ver historial</td><td><span class="path">git log --oneline --graph --decorate</span></td></tr>
+      <tr><td>Crear/cambiar a rama</td><td><span class="path">git switch -c feature/x</span></td></tr>
+      <tr><td>Cambiar de rama</td><td><span class="path">git switch main</span></td></tr>
+      <tr><td>Añadir GitHub como remoto</td><td><span class="path">git remote add origin URL</span></td></tr>
+      <tr><td>Ver remotos</td><td><span class="path">git remote -v</span></td></tr>
+      <tr><td>Primer push de una rama</td><td><span class="path">git push -u origin rama</span></td></tr>
+      <tr><td>Push normal</td><td><span class="path">git push</span></td></tr>
+      <tr><td>Descargar referencias remotas</td><td><span class="path">git fetch</span></td></tr>
+      <tr><td>Actualizar rama desde upstream</td><td><span class="path">git pull</span></td></tr>
+      <tr><td>Borrar rama local ya integrada</td><td><span class="path">git branch -d rama</span></td></tr>
+      <tr><td>Borrar rama remota</td><td><span class="path">git push origin --delete rama</span></td></tr>
+      <tr><td>Limpiar referencias remotas</td><td><span class="path">git fetch --prune</span></td></tr>
+      <tr><td>Apartar trabajo temporal</td><td><span class="path">git stash push -m "mensaje"</span></td></tr>
+      <tr><td>Recuperar stash</td><td><span class="path">git stash pop</span></td></tr>
+      <tr><td>Revertir commit compartido</td><td><span class="path">git revert HASH</span></td></tr>
+      <tr><td>Clonar repo existente</td><td><span class="path">git clone URL</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Secuencia mínima de trabajo</h3>
+  <div class="codebox"><div class="codehead">PowerShell — rutina <button class="copy">Copiar</button></div><pre><code>git switch main
+git pull
+git switch -c feature/nombre
+
+# trabajar
+
+git status
+git diff
+git add ruta/al/archivo
+git diff --cached
+git commit -m "feat: describe the change"
+git push -u origin feature/nombre
+
+# abrir PR → review → merge en GitHub
+
+git switch main
+git pull
+git branch -d feature/nombre
+git fetch --prune</code></pre></div>
+
+  <div class="callout ok"><strong>Meta de aprendizaje:</strong> cuando este bloque tenga sentido completo sin consultar las secciones anteriores, ya no estarás siguiendo una receta: estarás usando Git con un modelo mental estable.</div>
+</div>
+</section>
+
+<section class="part-divider errors-part" id="part-errores">
+  <div class="part-kicker">Bloque 3</div>
+  <h2>Banco de errores y recuperación</h2>
+  <p>Cuando Git se desvía del flujo normal, vienes aquí. Primero diagnostica; después aplica la corrección menos destructiva que resuelva el estado real.</p>
+</section>
+
+<section class="section" id="s18">
+<div class="section-head"><h2>23. Resolver conflictos de merge sin pánico</h2></div>
+<div class="section-body">
+  <p>Un conflicto no significa que Git esté roto. Significa que Git no puede decidir automáticamente cómo combinar dos modificaciones incompatibles.</p>
+
+  <div class="codebox"><div class="codehead">Detectar conflicto <button class="copy">Copiar</button></div><pre><code>git status</code></pre></div>
+
+  <h3>Marcadores típicos dentro del archivo</h3>
+  <div class="codebox"><div class="codehead">Ejemplo <button class="copy">Copiar</button></div><pre><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+versión de tu rama actual
+=======
+versión que se intenta integrar
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; otra-rama</code></pre></div>
+
+  <h3>Procedimiento</h3>
+  <ol>
+    <li>Abre cada archivo marcado como conflictivo.</li>
+    <li>Decide cuál debe ser el contenido final.</li>
+    <li>Elimina los marcadores <span class="path"><<<<<<<</span>, <span class="path">=======</span> y <span class="path">>>>>>>></span>.</li>
+    <li>Guarda el archivo.</li>
+    <li>Márcalo como resuelto con <span class="path">git add</span>.</li>
+    <li>Comprueba de nuevo <span class="path">git status</span>.</li>
+    <li>Completa la operación cuando todos los conflictos estén resueltos.</li>
+  </ol>
+
+  <div class="codebox"><div class="codehead">Después de resolver <button class="copy">Copiar</button></div><pre><code>git add ruta/al/archivo-conflictivo
+git status</code></pre></div>
+
+  <div class="callout bad"><strong>No elijas “ours” o “theirs” sin leer el código.</strong> Resolver un conflicto es una decisión semántica, no una operación de limpieza de texto.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He entendido qué cambios compiten.</strong></div><div class="note">No borres una versión solo para hacer desaparecer los marcadores.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>He validado el resultado después de resolverlo.</strong></div><div class="note">Un conflicto puede resolverse sintácticamente y dejar comportamiento incorrecto.</div></div>
+</div>
+</section>
+
+<section class="section" id="s20">
+<div class="section-head"><h2>24. Deshacer cambios: elegir la operación correcta</h2></div>
+<div class="section-body">
+  <div class="decision">
+    <div class="choice"><strong>Quiero descartar cambios no staged de un archivo</strong><br><span class="path">git restore archivo</span></div>
+    <div class="choice"><strong>Quiero sacar algo del staging pero conservar el archivo modificado</strong><br><span class="path">git restore --staged archivo</span></div>
+    <div class="choice"><strong>Quiero corregir el último commit local antes de publicarlo</strong><br><span class="path">git commit --amend</span></div>
+    <div class="choice"><strong>Quiero deshacer un commit que ya es historia compartida</strong><br><span class="path">git revert &lt;commit&gt;</span></div>
+  </div>
+
+  <h3>Descartar modificaciones locales de un archivo</h3>
+  <div class="codebox"><div class="codehead">Destructivo para ese archivo <button class="copy">Copiar</button></div><pre><code>git restore ruta/al/archivo</code></pre></div>
+
+  <h3>Des-stagear sin perder el cambio</h3>
+  <div class="codebox"><div class="codehead">Seguro para el contenido del working tree <button class="copy">Copiar</button></div><pre><code>git restore --staged ruta/al/archivo</code></pre></div>
+
+  <h3>Modificar el último commit todavía no compartido</h3>
+  <div class="codebox"><div class="codehead">Reescribe el último commit <button class="copy">Copiar</button></div><pre><code>git add ruta/al/archivo
+git commit --amend</code></pre></div>
+
+  <h3>Revertir un commit compartido</h3>
+  <div class="codebox"><div class="codehead">Crea un nuevo commit inverso <button class="copy">Copiar</button></div><pre><code>git revert HASH_DEL_COMMIT</code></pre></div>
+
+  <div class="callout bad"><strong>Regla práctica:</strong> si un commit ya se ha publicado y otras personas pueden depender de él, evita reescribir su historia. <span class="path">git revert</span> suele ser más seguro porque añade historia en vez de cambiar la existente.</div>
+
+  <div class="callout warn"><strong><span class="path">git restore archivo</span> sí puede destruir trabajo no guardado.</strong> Úsalo solo cuando realmente quieres descartar esas modificaciones.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Distingo des-stagear de descartar.</strong></div><div class="note"><span class="path">restore --staged</span> conserva cambios; <span class="path">restore archivo</span> los descarta.</div></div>
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Distingo reescribir historia de crear una reversión.</strong></div><div class="note">Es esencial cuando el trabajo ya se ha compartido.</div></div>
+</div>
+</section>
+
+<section class="section" id="s24">
+<div class="section-head"><h2>25. Diagnóstico rápido: “¿dónde estoy y qué está pasando?”</h2></div>
+<div class="section-body">
+  <p>Cuando algo no cuadra, no empieces a lanzar comandos de reparación al azar. Primero recopila estado.</p>
+
+  <div class="codebox"><div class="codehead">Bloque de diagnóstico seguro <button class="copy">Copiar</button></div><pre><code>git rev-parse --show-toplevel
+git status
+git branch --show-current
+git branch -vv
+git remote -v
+git log --oneline --decorate --graph --all -15</code></pre></div>
+
+  <table>
+    <thead><tr><th>Pregunta</th><th>Comando principal</th></tr></thead>
+    <tbody>
+      <tr><td>¿Estoy dentro del repositorio correcto?</td><td><span class="path">git rev-parse --show-toplevel</span></td></tr>
+      <tr><td>¿Qué archivos han cambiado?</td><td><span class="path">git status</span></td></tr>
+      <tr><td>¿Qué he cambiado pero aún no está staged?</td><td><span class="path">git diff</span></td></tr>
+      <tr><td>¿Qué entrará en el próximo commit?</td><td><span class="path">git diff --cached</span></td></tr>
+      <tr><td>¿En qué rama estoy?</td><td><span class="path">git branch --show-current</span></td></tr>
+      <tr><td>¿Qué upstream tiene mi rama?</td><td><span class="path">git branch -vv</span></td></tr>
+      <tr><td>¿A qué GitHub estoy conectado?</td><td><span class="path">git remote -v</span></td></tr>
+      <tr><td>¿Cómo se relacionan mis ramas y commits?</td><td><span class="path">git log --oneline --decorate --graph --all</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Banco de errores frecuentes</h3>
+  <table class="error-table">
+    <thead><tr><th>Mensaje o síntoma</th><th>Causa probable</th><th>Respuesta segura</th></tr></thead>
+    <tbody>
+      <tr><td>fatal: not a git repository</td><td>Estás fuera de la carpeta del repositorio o en una carpeta que no contiene <span class="path">.git</span>.</td><td>Localiza la raíz con tu explorador/terminal, entra en ella y comprueba con <span class="path">git rev-parse --show-toplevel</span>.</td></tr>
+      <tr><td>remote origin already exists</td><td>Ya existe un remoto llamado <span class="path">origin</span>.</td><td>Ejecuta <span class="path">git remote -v</span>. Si la URL es incorrecta, usa <span class="path">git remote set-url origin URL_CORRECTA</span>; no añadas un segundo <span class="path">origin</span>.</td></tr>
+      <tr><td>rejected / non-fast-forward</td><td>El remoto contiene commits que tu rama local todavía no integra.</td><td>Haz <span class="path">git fetch origin</span>, inspecciona el historial y después integra de forma consciente. No respondas con <span class="path">--force</span> por reflejo.</td></tr>
+      <tr><td>has no upstream branch</td><td>La rama local todavía no está asociada a una rama remota.</td><td>En el primer push usa <span class="path">git push -u origin NOMBRE_RAMA</span>.</td></tr>
+      <tr><td>nothing to commit, working tree clean</td><td>No hay cambios pendientes para commitear.</td><td>No es un error. Si esperabas cambios, comprueba que guardaste los archivos y que estás en el repositorio correcto.</td></tr>
+      <tr><td>changes not staged for commit</td><td>Hay cambios en el working tree, pero no están en staging.</td><td>Inspecciona con <span class="path">git diff</span> y añade solo lo que quieras incluir con <span class="path">git add</span>.</td></tr>
+      <tr><td>local changes would be overwritten</td><td>Intentas cambiar/integrar mientras tienes modificaciones locales incompatibles.</td><td>Decide conscientemente entre <strong>commit</strong>, <strong>stash</strong> o descartar. No borres cambios para desbloquear Git sin saber si los necesitas.</td></tr>
+      <tr><td>CONFLICT / unmerged paths</td><td>Git no puede combinar automáticamente cambios incompatibles.</td><td>Ve a la sección <a href="#s18">Resolver conflictos</a>, resuelve el contenido y valida antes de continuar.</td></tr>
+      <tr><td>Un archivo sigue apareciendo aunque está en .gitignore</td><td>El archivo ya estaba trackeado antes de añadir la regla de ignore.</td><td>Ve a <a href="#s21">Archivos ya trackeados</a>. El <span class="path">.gitignore</span> no hace que Git olvide archivos ya versionados.</td></tr>
+      <tr><td>He staged algo que no quería</td><td>El staging contiene más cambios de los deseados.</td><td>Usa <span class="path">git restore --staged archivo</span>. Conserva el contenido modificado en tu working tree.</td></tr>
+      <tr><td>He commiteado algo incorrecto</td><td>El commit ya existe; la respuesta depende de si se publicó o no.</td><td>Ve a <a href="#s20">Deshacer cambios</a>: <span class="path">--amend</span> para el último commit local no compartido; <span class="path">revert</span> cuando ya forma parte de historia compartida.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout bad"><strong>No uses “comandos de Internet” para arreglar Git sin saber qué estado tienes.</strong> Especialmente evita copiar a ciegas comandos con <span class="path">--hard</span>, <span class="path">--force</span> o <span class="path">clean</span>.</div>
+
+  <div class="step"><input class="check" type="checkbox"><div class="step-main"><strong>Antes de reparar, sé diagnosticar el estado.</strong></div><div class="note">Git suele ser mucho más fácil de arreglar cuando todavía no has ejecutado una operación destructiva.</div></div>
+</div>
+</section>
+
+<section class="section">
+<div class="section-head"><h2>Mapa conceptual final</h2></div>
+<div class="section-body">
+  <div class="flow">
+    <span class="node local">archivo modificado</span><span class="arrow">→ add →</span>
+    <span class="node local">staged</span><span class="arrow">→ commit →</span>
+    <span class="node local">commit local</span><span class="arrow">→ push →</span>
+    <span class="node remote">rama GitHub</span><span class="arrow">→ PR →</span>
+    <span class="node remote">review</span><span class="arrow">→ merge →</span>
+    <span class="node remote">origin/main</span><span class="arrow">→ pull →</span>
+    <span class="node good">main local actualizado</span>
+  </div>
+
+  <p class="muted small">GitHub Actions queda deliberadamente fuera de esta guía. Automatización de CI/CD debe aprenderse como una capa posterior, cuando este flujo manual ya esté claro.</p>
+</div>
+</section>
+
+<p class="footer">Checklist guardado en localStorage. El HTML es autocontenido, funciona sin servidor y puede abrirse directamente en el navegador.</p>
+</main>
+
+<script>
+(() => {
+  const key = 'guia-git-github-sin-actions-checks-v2';
+  const checks = [...document.querySelectorAll('.check')];
+  const progress = document.getElementById('progress');
+  const progressText = document.getElementById('progressText');
+  const saved = JSON.parse(localStorage.getItem(key) || '[]');
+
+  checks.forEach((c,i) => c.checked = !!saved[i]);
+
+  function updateProgress() {
+    const done = checks.filter(c => c.checked).length;
+    progress.style.width = (checks.length ? done / checks.length * 100 : 0) + '%';
+    progressText.textContent = `${done} / ${checks.length}`;
+    localStorage.setItem(key, JSON.stringify(checks.map(c => c.checked)));
+  }
+
+  checks.forEach(c => c.addEventListener('change', updateProgress));
+  updateProgress();
+
+  document.getElementById('reset').addEventListener('click', () => {
+    if (!confirm('¿Reiniciar todo el checklist?')) return;
+    checks.forEach(c => c.checked = false);
+    updateProgress();
+  });
+
+  document.querySelectorAll('.copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const code = btn.closest('.codebox').querySelector('code').innerText;
+      try {
+        await navigator.clipboard.writeText(code);
+        const old = btn.textContent;
+        btn.textContent = 'Copiado';
+        setTimeout(() => btn.textContent = old, 1100);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = code;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
