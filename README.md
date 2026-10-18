@@ -1,20 +1,40 @@
-# Development Guides & Harnesses
+# # Development Guides & Harnesses
+
+**Practical guides, structured workflows, and AI-assisted development harnesses.**
+
+---
+
+## # Development Guides & Harnesses
+
+![Documentation](https://img.shields.io/badge/Documentation-Development_Guides-111111)
+![Format](https://img.shields.io/badge/Format-Interactive_HTML-737373)
+![Focus](https://img.shields.io/badge/Focus-Software_Engineering-FACC15?labelColor=111111&color=FACC15)
+
+**Practical guides, structured workflows, and AI-assisted development harnesses.**
+
+---
+
+
 
 ## Introduction
 
-A collection of interactive guides for software development, covering project planning, Git workflows, and AI-assisted development environments.
+A collection of interactive resources covering software project preparation, version control, and AI-assisted development.
 
-These resources are designed to support learning, encourage structured development practices, and provide reusable starting points for different projects.
+These guides are designed to provide structured starting points, encourage sound engineering practices, and support the development of maintainable software projects.
 
 ## Table of Contents
 
-- Step 0 — Project Foundations
+- Introduction
 
-- Step 1 — Git & GitHub
+- Available Guides
+  
+  - Step 0 — Project Foundations
+  
+  - Step 1 — Git and GitHub
+  
+  - Step 2 — AI Development Harness
 
-- Step 2 — AI Development Harness
-
-- Adaptation and Project-Specific Configuration
+- Adaptation and Configuration
 
 - How to Use
 
@@ -24,80 +44,148 @@ These resources are designed to support learning, encourage structured developme
 
 ---
 
-## Step 0 — Project Foundations
+## Available Guides
+
+### Project Foundations
+
+**STEP 00** · Project Planning & Architecture
 
 **File:** Step0-Bones.html
 
 An interactive guide covering the preparation of a software project, from the initial idea to Git initialization.
 
-It introduces brainstorming, requirements, project scope, domain modeling, UML, database design, API contracts, architectural decisions, documentation, and initial project setup.
+**Topics covered:**
 
-## Step 1 — Git & GitHub
+- Brainstorming, requirements, and MVP definition.
+
+- Domain modeling and software architecture.
+
+- UML diagrams and database design.
+
+- REST API contracts and OpenAPI.
+
+- Project documentation and technical decisions.
+
+- Initial environment and project setup.
+
+**Scope:** From concept to `git init`.
+
+---
+
+### Git and GitHub
+
+**STEP 01** · Version Control & Collaboration
 
 **File:** Step1-Git.html
 
-A practical guide to version control with Git and GitHub, organized into three areas:
+A practical guide to Git and GitHub, covering repository initialization, development workflows, common operations, and troubleshooting.
 
-- **Development workflow:** Repository initialization, branching, commits, pull requests, code reviews, and merges.
+**Topics covered:**
 
-- **Git operations:** Common commands and useful operations for managing repositories.
+- Repository initialization and configuration.
 
-- **Troubleshooting:** Frequent errors, conflict resolution, and recovery procedures.
+- Branching strategies and commit management.
 
-## Step 2 — AI Development Harness
+- Pull requests, code reviews, and merges.
+
+- Everyday Git commands and operations.
+
+- Conflict resolution and error recovery.
+
+- Repository maintenance.
+
+**Scope:** From the first commit to established Git workflows.
+
+---
+
+### AI Development Harness
+
+**STEP 02** · AI Agents & Development Automation
 
 **File:** Step2-Opencode.html
 
-An interactive implementation guide for configuring a multi-agent development environment using OpenCode, Codex, Claude, and Gemini.
+An interactive implementation guide for configuring a specific multi-agent software development environment using OpenCode, Codex, Claude, and Gemini.
 
-It covers agent roles and responsibilities, configuration files, permissions, subagents, code review, development logging, automation scripts, and coordinated development workflows.
+**Topics covered:**
 
-The guide presents one particular configuration rather than a universal AI development architecture.
+- Agent architecture, roles, and responsibilities.
 
-## Adaptation and Project-Specific Configuration
+- Subagents and orchestration.
 
-**These guides are starting points, not rigid procedures or universal standards.**
+- Configuration files and permissions.
 
-Every project has different requirements, constraints, technologies, and architectural decisions.
+- AI-assisted implementation and code review.
 
-Consequently:
+- Automated development logs.
 
-- Some steps may be unnecessary for a particular project.
+- Monitoring scripts and coordinated workflows.
+
+- Validation and operational procedures.
+
+**Scope:** A project-specific AI development harness, intended for adaptation rather than direct replication.
+
+---
+
+## Adaptation and Configuration
+
+**These guides are starting points, not universal procedures or rigid development standards.**
+
+Every software project has its own architecture, technologies, constraints, and requirements.
+
+When applying these guides:
+
+- Some steps may be unnecessary.
 
 - Additional steps may be required.
 
-- Existing procedures may need to be modified or reordered.
+- Procedures may need to be modified or reordered.
 
-- Configuration files, scripts, agent definitions, permissions, and development conventions must be adapted to the target project.
+- Configuration files and scripts must be adapted to the target environment.
 
-- Examples should be reviewed and understood before being implemented.
+- Agent roles, permissions, and automation mechanisms must be reviewed individually.
 
-The configurations provided are illustrative and should never be assumed to be suitable for every environment.
+- Technical decisions must be validated against project-specific requirements.
 
-**The objective is to understand the process, evaluate its relevance, and adapt it—not to follow instructions blindly.**
+**Understand the process. Evaluate its relevance. Adapt the implementation.**
+
+The goal is to encourage informed engineering decisions, not mechanical execution of predefined instructions.
+
+---
 
 ## How to Use
 
-The guides are provided as interactive HTML documents.
+The guides are distributed as interactive HTML documents.
 
-1. Open the desired HTML file in a modern web browser.
+1. Select a guide from the Available Guides section.
 
-2. Follow the explanations and practical examples.
+2. Download the corresponding HTML file.
 
-3. Use the interactive checklists to track progress.
+3. Open it in a modern web browser.
 
-4. Adapt commands, configurations, and procedures to your own project.
+4. Follow the instructions and use the interactive checklists.
 
-Although the guides follow a suggested sequence, they may also be consulted independently.
+5. Adapt the procedures, examples, and configurations to your project.
+
+The guides follow a suggested sequence but can also be consulted independently.
+
+---
 
 ## Repository Structure
 
 ```
-development-guides-andd-harnesses/├── README.md├── Step0-Bones.html├── Step1-Git.html└── Step2-Opencode.html
+Development-Guides-Harnesses/├── .gitattributes├── .gitignore├── README.md├── Step0-Bones.html├── Step1-Git.html└── Step2-Opencode.html
 ```
+
+---
 
 ## Disclaimer
 
-These resources are intended for educational and reference purposes. Technical configurations, dependencies, security requirements, and tooling behavior may evolve over time.
+These resources are provided for educational and reference purposes.
 
-Always validate commands, configurations, and automated processes against the requirements of your own environment before using them.
+Tooling, dependencies, APIs, and security requirements may change over time. Examples and configurations are not guaranteed to be suitable for every project or environment.
+
+Review and validate all technical instructions before applying them.
+
+---
+
+**Development Guides & Harnesses** · Learn · Understand · Adapt
