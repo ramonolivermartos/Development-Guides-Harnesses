@@ -28,7 +28,7 @@ All guides are independent resources stored in the [guides and harnesses](guides
 
 - [Available Guides](#available-guides)
   
-  - [Project Foundations](#project-foundations)
+  - [Project Foundations (Bones)](#project-foundations)
   
   - [Git and GitHub](#git-and-github)
   
