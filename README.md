@@ -20,25 +20,29 @@ A collection of interactive resources covering software project preparation, ver
 
 These guides are designed to provide structured starting points, encourage sound engineering practices, and support the development of maintainable software projects.
 
+All guides are independent resources stored in the [guides and harnesses](guides%20and%20harnesses/) folder. Choose the guide that fits your needs; no reading order is required.
+
 ## Table of Contents
 
-- Introduction
+- [Introduction](#introduction)
 
-- Available Guides
+- [Available Guides](#available-guides)
   
-  - Step 0 — Project Foundations
+  - [Project Foundations](#project-foundations)
   
-  - Step 1 — Git and GitHub
+  - [Git and GitHub](#git-and-github)
   
-  - Step 2 — AI Development Harness
+  - [OpenCode — AI Development Harness](#ai-development-harness)
+  
+  - [Spec-Driven Development (SDD)](#spec-driven-development)
 
-- Adaptation and Configuration
+- [Adaptation and Configuration](#adaptation-and-configuration)
 
-- How to Use
+- [How to Use](#how-to-use)
 
-- Repository Structure
+- [Repository Structure](#repository-structure)
 
-- Disclaimer
+- [Disclaimer](#disclaimer)
 
 ---
 
@@ -46,9 +50,9 @@ These guides are designed to provide structured starting points, encourage sound
 
 ### Project Foundations
 
-**STEP 00** · Project Planning & Architecture
+**Project Planning & Architecture**
 
-**File:** Step0-Bones.html
+**File:** [Bones.html](guides%20and%20harnesses/Bones.html)
 
 An interactive guide covering the preparation of a software project, from the initial idea to Git initialization.
 
@@ -72,9 +76,9 @@ An interactive guide covering the preparation of a software project, from the in
 
 ### Git and GitHub
 
-**STEP 01** · Version Control & Collaboration
+**Version Control & Collaboration**
 
-**File:** Step1-Git.html
+**File:** [Git.html](guides%20and%20harnesses/Git.html)
 
 A practical guide to Git and GitHub, covering repository initialization, development workflows, common operations, and troubleshooting.
 
@@ -98,9 +102,9 @@ A practical guide to Git and GitHub, covering repository initialization, develop
 
 ### AI Development Harness
 
-**STEP 02** · AI Agents & Development Automation
+**AI Agents & Development Automation**
 
-**File:** Step2-Opencode.html
+**File:** [Opencode.html](guides%20and%20harnesses/Opencode.html)
 
 An interactive implementation guide for configuring a specific multi-agent software development environment using OpenCode, Codex, Claude, and Gemini.
 
@@ -121,6 +125,30 @@ An interactive implementation guide for configuring a specific multi-agent softw
 - Validation and operational procedures.
 
 **Scope:** A project-specific AI development harness, intended for adaptation rather than direct replication.
+
+---
+
+### Spec-Driven Development
+
+**Specifications & AI-Assisted Development**
+
+**File:** [Spec-Driven Development explained.html](guides%20and%20harnesses/Spec-Driven%20Development%20explained.html)
+
+An interactive guide explaining Spec-Driven Development (SDD), where the specification defines the expected behavior and guides planning, tasks, implementation, and validation.
+
+**Topics covered:**
+
+- Specification-driven development compared with coding from a short prompt.
+
+- The cycle of specifying, planning, breaking work into tasks, and implementing.
+
+- Clear requirements, testable acceptance criteria, and explicit uncertainties.
+
+- An interactive task API example linking requirements to criteria and implementation tasks.
+
+- When to use SDD and tools that support the approach.
+
+**Scope:** Understanding the SDD workflow and writing specifications that guide AI-assisted development.
 
 ---
 
@@ -152,9 +180,9 @@ The goal is to encourage informed engineering decisions, not mechanical executio
 
 ## How to Use
 
-The guides are distributed as interactive HTML documents.
+The guides are distributed as interactive HTML documents in the [guides and harnesses](guides%20and%20harnesses/) folder.
 
-1. Select a guide from the Available Guides section.
+1. Select a guide from the [Available Guides](#available-guides) section.
 
 2. Download the corresponding HTML file.
 
@@ -164,14 +192,25 @@ The guides are distributed as interactive HTML documents.
 
 5. Adapt the procedures, examples, and configurations to your project.
 
-The guides follow a suggested sequence but can also be consulted independently.
+Each guide can be consulted independently, in any order.
 
 ---
 
 ## Repository Structure
 
 ```
-Development-Guides-Harnesses/├── .gitattributes├── .gitignore├── README.md├── Step0-Bones.html├── Step1-Git.html└── Step2-Opencode.html
+Development-Guides-Harnesses/
+├── .gitattributes
+├── .gitignore
+├── README.md
+├── guides and harnesses/
+│   ├── Bones.html
+│   ├── Git.html
+│   ├── Opencode.html
+│   └── Spec-Driven Development explained.html
+└── assets/
+    ├── banner.svg
+    └── divider.svg
 ```
 
 ---
