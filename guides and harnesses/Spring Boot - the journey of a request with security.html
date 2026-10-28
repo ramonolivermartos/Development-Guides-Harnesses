@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spring Boot: the journey of a request with security</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;800&family=Public+Sans:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF2F0;--surface:#FFFFFF;--ink:#10262B;--muted:#4F6569;--line:#CBD8D5;
+  --teal:#0B7A75;--teal-soft:#D8EEEB;--on-teal:#FFFFFF;--stop:#B8321A;--stop-soft:#FBE3DC;--gold:#F6D77A;
+  --head:Sora,"Trebuchet MS",system-ui,sans-serif;--body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"Fira Code",ui-monospace,Menlo,Consolas,monospace;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0C1A1D;--surface:#13262A;--ink:#E6F1EF;--muted:#9BB5B1;--line:#27434A;--teal:#4FD1C5;--teal-soft:#16393B;--on-teal:#08201F;--stop:#FF8F70;--stop-soft:#3F1F18;--gold:#6B5614;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0C1A1D;--surface:#13262A;--ink:#E6F1EF;--muted:#9BB5B1;--line:#27434A;--teal:#4FD1C5;--teal-soft:#16393B;--on-teal:#08201F;--stop:#FF8F70;--stop-soft:#3F1F18;--gold:#6B5614;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1.05rem/1.65 var(--body)}
+main{max-width:52rem;margin:0 auto;padding:0 1.25rem 4rem}
+h1,h2,h3,h4{font-family:var(--head);line-height:1.15;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(2rem,5.5vw,3rem);font-weight:800;max-width:18ch}
+h2{font-size:clamp(1.5rem,4vw,1.9rem);font-weight:800;margin-bottom:.5rem}
+h3{font-size:1.08rem;font-weight:600}
+p{margin:.55rem 0;max-width:64ch}
+section{padding-top:3.3rem}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.hero{padding:3.3rem 0 0}
+.lead{font-size:1.18rem;margin-top:1rem}
+mark{background:var(--gold);color:var(--ink);padding:0 .15em;border-radius:3px}
+code{font:400 .86em var(--mono);background:var(--teal-soft);padding:.05em .35em;border-radius:4px}
+.btns{display:flex;flex-wrap:wrap;gap:.45rem;margin:1rem 0}
+button{font:500 .95rem var(--body);padding:.55rem .95rem;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover:not(:disabled){border-color:var(--teal)}
+button[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:var(--on-teal)}
+button.go{background:var(--teal);border-color:var(--teal);color:var(--on-teal);font-weight:600}
+button:disabled{opacity:.45;cursor:default}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.25rem}
+/* the journey: the memorable piece */
+.trip{display:grid;gap:1rem;margin-top:.6rem}
+@media(min-width:780px){.trip{grid-template-columns:17rem 1fr;align-items:start}}
+.rail{list-style:none;margin:0;padding:.5rem;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.rail li{position:relative;padding:.55rem .7rem .55rem 2.3rem;border-radius:8px;font-weight:500;color:var(--muted);font-size:.96rem}
+.rail li::before{content:"";position:absolute;left:.7rem;top:50%;width:.95rem;height:.95rem;margin-top:-.475rem;border-radius:50%;border:2px solid var(--line);background:var(--surface);z-index:1}
+.rail li::after{content:"";position:absolute;left:1.13rem;top:calc(50% + .475rem);height:calc(100% - .95rem);width:2px;background:var(--line)}
+.rail li:last-child::after{display:none}
+.rail li.seen{color:var(--ink)}
+.rail li.seen::before{background:var(--teal);border-color:var(--teal)}
+.rail li.seen::after{background:var(--teal)}
+.rail li.on{background:var(--teal-soft);color:var(--ink)}
+.rail li.on::before{box-shadow:0 0 0 4px var(--teal-soft),0 0 0 6px var(--teal);background:var(--teal);border-color:var(--teal)}
+.rail li.fail{background:var(--stop-soft);color:var(--stop)}
+.rail li.fail::before{background:var(--stop);border-color:var(--stop);box-shadow:none}
+.badge{display:inline-block;font:600 .82rem var(--body);padding:.15rem .6rem;border-radius:99px;background:var(--teal-soft);margin-bottom:.5rem}
+.badge.fail{background:var(--stop-soft);color:var(--stop)}
+pre{margin:.7rem 0 0;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:.85rem 1rem;overflow-x:auto;font:400 .8rem/1.6 var(--mono);white-space:pre}
+.res{margin-top:.9rem;padding:.7rem .9rem;border-radius:6px;background:var(--teal-soft);font-weight:500}
+.res.fail{background:var(--stop-soft);color:var(--stop)}
+.res pre{margin:.4rem 0 0}
+.dir{color:var(--muted);font-size:.92rem}
+.cols{display:grid;gap:1rem;margin-top:1rem}
+@media(min-width:780px){.cols.two{grid-template-columns:1fr 1fr}}
+.bad{background:var(--stop-soft);color:var(--stop);border-radius:6px;padding:.6rem .85rem;margin:.4rem 0;font-size:.96rem}
+.good{background:var(--teal-soft);border-radius:6px;padding:.6rem .85rem;margin:.4rem 0;font-size:.96rem}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:.15rem 1.1rem;margin-bottom:.6rem}
+summary{cursor:pointer;font-weight:600;padding:.75rem 0}
+details>div{padding-bottom:.9rem}
+.st{font:600 .88rem var(--body);color:var(--stop)}
+footer{margin-top:3rem;border-top:1px solid var(--line);padding-top:1rem;color:var(--muted);font-size:.94rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header class="hero">
+  <h1>The journey of a request in Spring Boot with security</h1>
+  <p class="lead">From the moment the client makes a call until the database responds, a request crosses several layers. Each one has <mark>a single responsibility</mark>. Choose a scenario and move through it step by step to see who acts, which code is involved, and where the journey can stop.</p>
+</header>
+
+<section id="viaje">
+  <h2>Walk through a request</h2>
+  <div class="btns" id="scn" role="group" aria-label="Scenario"></div>
+  <div class="trip">
+    <ol class="rail" id="rail" aria-label="Layers"></ol>
+    <div class="panel" id="detail" aria-live="polite"></div>
+  </div>
+  <div class="btns">
+    <button class="go" id="next">Next step</button>
+    <button id="reset">Reset</button>
+  </div>
+</section>
+
+<section id="dto">
+  <h2>Why DTOs and mappers sit in between</h2>
+  <p>The entity reflects your table. The DTO is the contract with the client. Toggle between the options to see what happens in <code>GET /api/users/me</code> if you return the entity directly.</p>
+  <div class="btns">
+    <button id="d-ent" aria-pressed="true">Return the entity</button>
+    <button id="d-dto" aria-pressed="false">Return a DTO</button>
+  </div>
+  <div class="cols two" id="dtobox" aria-live="polite"></div>
+</section>
+
+<section id="seg">
+  <h2>Authentication and authorization at three levels</h2>
+  <p><strong>Authentication</strong> answers “who are you?” and, if it fails, returns <span class="st">401</span>. <strong>Authorization</strong> answers “what are you allowed to do?” and, if it fails, returns <span class="st">403</span>. Authorization is best checked across several layers at once.</p>
+  <details open><summary>Level 1: the route (SecurityFilterChain)</summary><div>General rules by URL and HTTP method. This is the first barrier and the least expensive one.<pre>.authorizeHttpRequests(a -> a
+  .requestMatchers("/api/auth/**").permitAll()
+  .requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasRole("ADMIN")
+  .anyRequest().authenticated())</pre></div></details>
+  <details><summary>Level 2: the method (@PreAuthorize)</summary><div>Protects the logic even if someone calls it from another entry point. It requires <code>@EnableMethodSecurity</code> in your configuration.<pre>@PreAuthorize("hasRole('ADMIN')")
+public void deleteOrder(Long id) { ... }</pre></div></details>
+  <details><summary>Level 3: the data (is this order yours?)</summary><div>No route rule knows who owns order 7. That check belongs in the service, using the user from the <code>SecurityContext</code>. It is what prevents Ana from reading Luis’s orders.<pre>if (!order.getOwner().equals(currentUsername())) {
+    throw new AccessDeniedException("This is not your order");
+}</pre></div></details>
+</section>
+
+<section id="reglas">
+  <h2>How the work is divided</h2>
+  <div class="panel"><pre>com.example.shop
+├── config      SecurityConfig
+├── security    JwtAuthFilter, JwtService, UserDetailsServiceImpl
+├── order
+│   ├── OrderController      HTTP only
+│   ├── OrderService         rules, transactions, ownership
+│   ├── OrderRepository      data access only
+│   ├── OrderMapper          entity and DTO
+│   ├── Order                JPA entity
+│   └── dto                  CreateOrderRequest, OrderResponse
+└── error       GlobalExceptionHandler (@RestControllerAdvice)</pre></div>
+  <details><summary>Controller</summary><div>Translates HTTP to DTOs and back, validates with <code>@Valid</code>, and delegates. No business logic and no direct access to repositories.</div></details>
+  <details><summary>Service</summary><div>Business rules, <code>@Transactional</code>, and ownership checks belong here. It returns DTOs so that entities do not leave this layer.</div></details>
+  <details><summary>Repository</summary><div>Queries only. If you start adding business-related <code>if</code> statements, that logic belongs in the service.</div></details>
+  <details><summary>Passwords and secrets</summary><div>Hash passwords with <code>BCryptPasswordEncoder</code>; never store them in plain text. The JWT secret goes in an environment variable, not in the repository, and tokens should expire soon.</div></details>
+  <details><summary>Errors</summary><div>A <code>@RestControllerAdvice</code> converts exceptions into consistent JSON responses. Do not expose stack traces.</div></details>
+  <footer>Simplified example using Spring Boot 3, Spring Security 6, and stateless JWT authentication. In a real project, add refresh tokens, security tests, and rate limits.</footer>
+</section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const ST=[["client","Client"],["filter","JWT filter (authentication)"],["authz","Access rules (authorization)"],["ctrl","Controller"],["svc","Service"],["map","Mapper"],["repo","Repository"],["db","Database"]];
+
+const C={
+filter:`public class JwtAuthFilter extends OncePerRequestFilter {
+  protected void doFilterInternal(HttpServletRequest req,
+      HttpServletResponse res, FilterChain chain) throws ... {
+    String h = req.getHeader("Authorization");
+    if (h != null && h.startsWith("Bearer ")) {
+      String token = h.substring(7);
+      if (jwtService.isValid(token)) {
+        UserDetails u = users.loadUserByUsername(jwtService.subject(token));
+        var auth = new UsernamePasswordAuthenticationToken(
+            u, null, u.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+      }
+    }
+    chain.doFilter(req, res); // no token: continue as anonymous
+  }
+}`,
+chain:`.authorizeHttpRequests(a -> a
+  .requestMatchers("/api/auth/**").permitAll()
+  .requestMatchers(HttpMethod.DELETE, "/api/orders/**").hasRole("ADMIN")
+  .anyRequest().authenticated())`,
+post:`@PostMapping
+ResponseEntity<OrderResponse> create(
+    @Valid @RequestBody CreateOrderRequest req) {
+  OrderResponse created = service.create(req);
+  return ResponseEntity.status(HttpStatus.CREATED).body(created);
+}
+
+public record CreateOrderRequest(
+    @NotBlank String product,
+    @Min(1) int quantity) {}`,
+get:`@GetMapping("/{id}")
+OrderResponse get(@PathVariable Long id) {
+  return service.get(id);
+}`,
+svcCreate:`@Transactional
+public OrderResponse create(CreateOrderRequest req) {
+  Order order = mapper.toEntity(req);
+  order.setOwner(currentUsername()); // from the SecurityContext
+  return mapper.toResponse(repo.save(order));
+}`,
+svcGet:`@Transactional(readOnly = true)
+public OrderResponse get(Long id) {
+  Order o = repo.findById(id)
+      .orElseThrow(() -> new OrderNotFoundException(id));
+  if (!o.getOwner().equals(currentUsername()))
+    throw new AccessDeniedException("This is not your order");
+  return mapper.toResponse(o);
+}`,
+mapIn:`@Mapper(componentModel = "spring")
+interface OrderMapper {
+  @Mapping(target = "id", ignore = true)
+  @Mapping(target = "owner", ignore = true)
+  Order toEntity(CreateOrderRequest req);
+
+  OrderResponse toResponse(Order order);
+}`,
+mapOut:`public record OrderResponse(
+    Long id, String product, int quantity, Instant createdAt) {}
+// owner and internal data are not sent to the client`,
+repo:`interface OrderRepository extends JpaRepository<Order, Long> {
+  List<Order> findByOwner(String owner);
+}
+// save() and findById() are already included`,
+ins:`insert into orders (product, quantity, owner, created_at)
+values ('Keyboard', 2, 'ana', now())`,
+sel:`select id, product, quantity, owner, created_at
+from orders where id = 7`,
+adv:`@RestControllerAdvice
+class GlobalExceptionHandler {
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  ResponseEntity<ErrorBody> invalid(MethodArgumentNotValidException e) {
+    // field -> message, without internal details
+    return ResponseEntity.badRequest().body(ErrorBody.from(e));
+  }
+}`
+};
+const HP='Authorization: Bearer eyJhbGciOi...';
+const SC=[
+ {k:"crear",n:"Create an order with a valid token",res:[201,'{ "id": 12, "product": "Keyboard", "quantity": 2,\n  "createdAt": "2026-10-15T10:32:00Z" }'],steps:[
+  ["client","ok","The request is sent","The client sends a POST with the JWT in the header and JSON in the body.",`POST /api/orders\n${HP}\nContent-Type: application/json\n\n{ "product": "Keyboard", "quantity": 2 }`],
+  ["filter","ok","Authentication: who are you?","JwtAuthFilter validates the token’s signature and expiration, loads the user “ana”, and stores the user in the SecurityContext.","filter"],
+  ["authz","ok","Route-level authorization","POST /api/orders only requires authentication. Ana is authenticated, so the request proceeds.","chain"],
+  ["ctrl","ok","Controller: HTTP to DTO","Jackson converts the JSON into CreateOrderRequest, and @Valid checks the constraints. The controller delegates to the service.","post"],
+  ["svc","ok","Service: business rules","Opens the transaction and assigns the user from the token as the owner. The client never decides who the owner is.","svcCreate"],
+  ["map","ok","Mapper: DTO to entity","MapStruct creates the Order entity. The id and owner fields are ignored because they do not come from the client.","mapIn"],
+  ["repo","ok","Repository","save() delegates to Spring Data JPA. You do not write the SQL.","repo"],
+  ["db","ok","Database","Hibernate executes the INSERT and retrieves the generated id.","ins"],
+  ["repo","back","Return: saved entity","The repository returns the Order entity, now with an id."],
+  ["map","back","Mapper: entity to DTO","Order is converted into OrderResponse. Only the fields intended for the client are returned.","mapOut"],
+  ["ctrl","back","Controller: HTTP response","A 201 Created response is built with the DTO as its body."],
+  ["client","back","The client receives the response","Journey complete: each layer did only its part."]]},
+ {k:"anon",n:"No token",res:[401,'{ "status": 401, "error": "Unauthorized" }'],steps:[
+  ["client","ok","The request is sent","The client requests an order without sending an Authorization header.","GET /api/orders/7"],
+  ["filter","ok","Authentication: no one","There is no token, so the filter does not authenticate anyone. The request continues, but as anonymous.","filter"],
+  ["authz","fail","Stopped: 401","anyRequest().authenticated() rejects the anonymous request, and the AuthenticationEntryPoint returns 401. You define the body format.","chain"]]},
+ {k:"rol",n:"Insufficient role",res:[403,'{ "status": 403, "error": "Forbidden" }'],steps:[
+  ["client","ok","The request is sent","Ana (USER role) tries to delete an order with a valid token.",`DELETE /api/orders/7\n${HP}`],
+  ["filter","ok","Successful authentication","The token is valid: Ana is authenticated with the USER role.","filter"],
+  ["authz","fail","Stopped: 403","The rule requires hasRole(\"ADMIN\"). Ana is authenticated but not authorized: 403, not 401. The request does not reach the controller.","chain"]]},
+ {k:"dto",n:"Invalid body",res:[400,'{ "status": 400,\n  "errors": { "quantity": "must be greater than or equal to 1" } }'],steps:[
+  ["client","ok","The request is sent","Ana sends an order with a negative quantity.",`POST /api/orders\n${HP}\n\n{ "product": "Keyboard", "quantity": -3 }`],
+  ["filter","ok","Successful authentication","Valid token: Ana is authenticated.","filter"],
+  ["authz","ok","Route-level authorization","The route only requires authentication: the request proceeds.","chain"],
+  ["ctrl","fail","Stopped: 400","@Valid detects quantity < 1 and throws MethodArgumentNotValidException before entering the method. Your @RestControllerAdvice translates it into a clear 400 response. The service is never reached.","adv"]]},
+ {k:"ajeno",n:"Someone else’s order",res:[403,'{ "status": 403, "error": "Forbidden" }'],steps:[
+  ["client","ok","The request is sent","Ana requests order 7, which belongs to Luis.",`GET /api/orders/7\n${HP}`],
+  ["filter","ok","Successful authentication","Ana is authenticated.","filter"],
+  ["authz","ok","Route-level authorization","The route only requires authentication: the request proceeds. No URL rule knows who owns the order.","chain"],
+  ["ctrl","ok","Controller","Receives the id and delegates to the service.","get"],
+  ["svc","ok","Service requests the order","It needs the entity to check its owner.","svcGet"],
+  ["repo","ok","Repository","findById(7) returns Luis’s order.","repo"],
+  ["db","ok","Database","The SELECT is executed.","sel"],
+  ["svc","fail","Stopped: 403","The owner is “luis” and the current user is “ana”: AccessDeniedException. Only the service can perform this data-level authorization.","svcGet"]]}
+];
+let sc=0,i=-1;
+const scn=$("#scn"),rail=$("#rail"),det=$("#detail"),nx=$("#next");
+SC.forEach((s,j)=>{const b=el("button",null,s.n);b.onclick=()=>{sc=j;i=-1;draw()};b.dataset.j=j;scn.append(b)});
+ST.forEach(([id,l])=>{const li=el("li",null,l);li.dataset.id=id;rail.append(li)});
+function draw(){
+  const S=SC[sc],steps=S.steps;
+  [...scn.children].forEach(b=>b.setAttribute("aria-pressed",+b.dataset.j===sc));
+  const seen=new Set(steps.slice(0,Math.max(i,0)).map(s=>s[0]));
+  const cur=i>=0?steps[i]:null;
+  [...rail.children].forEach(li=>{
+    li.className="";
+    if(seen.has(li.dataset.id))li.classList.add("seen");
+    if(cur&&cur[0]===li.dataset.id)li.classList.add(cur[1]==="fail"?"fail":"on");
+  });
+  det.innerHTML="";
+  if(!cur){
+    det.append(el("h3",null,S.n),el("p",null,"Click “Next step” to start the journey. You will see every layer the request passes through, along with the code involved."));
+  }else{
+    const last=i===steps.length-1,fail=cur[1]==="fail";
+    det.append(el("span","badge"+(fail?" fail":""),fail?"Request rejected":cur[1]==="back"?"Return":"Outbound"));
+    det.append(el("h3",null,cur[2]),el("p",null,cur[3]));
+    if(cur[4]){det.append(Object.assign(el("pre"),{textContent:C[cur[4]]||cur[4]}))}
+    if(last){
+      const [code,body]=S.res,r=el("div","res"+(code>=400?" fail":""));
+      r.append(el("div",null,"HTTP response "+code),Object.assign(el("pre"),{textContent:body}));det.append(r);
+    }
+  }
+  nx.disabled=i>=steps.length-1;
+}
+nx.onclick=()=>{if(i<SC[sc].steps.length-1){i++;draw()}};
+$("#reset").onclick=()=>{i=-1;draw()};
+draw();
+
+/* DTO vs entity */
+const D={
+ ent:{code:`@GetMapping("/me")
+User me() {
+  return userService.current();
+}  // returns the JPA entity`,
+  json:`{
+  "id": 4,
+  "username": "ana",
+  "email": "ana@example.com",
+  "passwordHash": "$2a$10$N9qo8uLO...",
+  "roles": ["USER"],
+  "failedLoginAttempts": 2
+}`,
+  pts:[["bad","Data leak: the password hash and internal fields are sent to the client."],["bad","Mass assignment: if you accept the entity in a POST, the client can send \"roles\":[\"ADMIN\"] and assign that role to themselves."],["bad","Coupling: renaming a column breaks your public API."]]},
+ dto:{code:`public record UserResponse(
+    Long id, String username, String email) {}
+
+@GetMapping("/me")
+UserResponse me() {
+  return mapper.toResponse(userService.current());
+}`,
+  json:`{
+  "id": 4,
+  "username": "ana",
+  "email": "ana@example.com"
+}`,
+  pts:[["good","Only what you choose to expose is returned."],["good","On input, a DTO without a roles field makes it impossible to assign that field from outside."],["good","The API and the table can evolve independently: the mapper handles the difference."]]}
+};
+function dto(k){
+  $("#d-ent").setAttribute("aria-pressed",k==="ent");$("#d-dto").setAttribute("aria-pressed",k==="dto");
+  const d=D[k],b=$("#dtobox");b.innerHTML="";
+  const l=el("div","panel");l.append(el("h3",null,"Code"),Object.assign(el("pre"),{textContent:d.code}));
+  const r=el("div","panel");r.append(el("h3",null,"What the client receives"),Object.assign(el("pre"),{textContent:d.json}));
+  d.pts.forEach(p=>r.append(el("div",p[0],p[1])));
+  b.append(l,r);
+}
+$("#d-ent").onclick=()=>dto("ent");$("#d-dto").onclick=()=>dto("dto");dto("ent");
+</script>
+</body>
+</html>

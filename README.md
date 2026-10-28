@@ -35,6 +35,8 @@ All guides are independent resources stored in the [guides and harnesses](guides
   - [OpenCode — AI Development Harness](#ai-development-harness)
   
   - [Spec-Driven Development (SDD)](#spec-driven-development)
+  
+  - [Spring Boot — Request Journey and Security](#spring-boot-request-journey-and-security)
 
 - [Adaptation and Configuration](#adaptation-and-configuration)
 
@@ -152,6 +154,30 @@ An interactive guide explaining Spec-Driven Development (SDD), where the specifi
 
 ---
 
+### Spring Boot Request Journey and Security
+
+**Request Flow & Application Security**
+
+**File:** [Spring Boot - the journey of a request with security.html](guides%20and%20harnesses/Spring%20Boot%20-%20the%20journey%20of%20a%20request%20with%20security.html)
+
+An interactive guide following a request through a Spring Boot application, showing how authentication, authorization, validation, and the application layers work together.
+
+**Topics covered:**
+
+- The request and response journey through the client, JWT filter, controller, service, mapper, repository, and database.
+
+- Five scenarios: a valid request, a missing token, an insufficient role, an invalid request body, and access to another user's order.
+
+- Authentication and authorization at the route, method, and data levels.
+
+- DTOs and mappers for separating the API contract from persistence entities.
+
+- Layer responsibilities, password and secret handling, and consistent error responses.
+
+**Scope:** Understanding request flow and security boundaries through a simplified example using Spring Boot 3, Spring Security 6, and stateless JWT authentication.
+
+---
+
 ## Adaptation and Configuration
 
 **These guides are starting points, not universal procedures or rigid development standards.**
@@ -207,7 +233,8 @@ Development-Guides-Harnesses/
 │   ├── Bones.html
 │   ├── Git.html
 │   ├── Opencode.html
-│   └── Spec-Driven Development explained.html
+│   ├── Spec-Driven Development explained.html
+│   └── Spring Boot - the journey of a request with security.html
 └── assets/
     ├── banner.svg
     └── divider.svg
