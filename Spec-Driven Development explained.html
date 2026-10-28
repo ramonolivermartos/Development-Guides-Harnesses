@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spec-Driven Development explained</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F5FA;--surface:#FFFFFF;--ink:#16213E;--muted:#55607C;--line:#D5DCEA;
+  --blue:#2748D8;--blue-soft:#E3E9FD;--mark:#FFE58A;--ok:#1F7A5C;--warn:#A8480F;--warn-soft:#FCEBDD;
+  --head:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1526;--surface:#171F36;--ink:#E8ECF7;--muted:#9AA6C4;--line:#2A3556;
+    --blue:#8CA4FF;--blue-soft:#222F5E;--mark:#5E4F0E;--ok:#5FD2A5;--warn:#F0A06A;--warn-soft:#3A2515;color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1526;--surface:#171F36;--ink:#E8ECF7;--muted:#9AA6C4;--line:#2A3556;
+  --blue:#8CA4FF;--blue-soft:#222F5E;--mark:#5E4F0E;--ok:#5FD2A5;--warn:#F0A06A;--warn-soft:#3A2515;color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1.0625rem/1.65 var(--body)}
+main{max-width:46rem;margin:0 auto;padding:0 1.25rem 4rem}
+h1,h2,h3{font-family:var(--head);line-height:1.12;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(2.1rem,6vw,3.3rem);font-weight:800;max-width:17ch}
+h2{font-size:clamp(1.55rem,4vw,2rem);font-weight:800;margin-bottom:.6rem}
+h3{font-size:1.15rem;font-weight:600}
+p{margin:.6rem 0;max-width:62ch}
+section{padding-top:3.5rem}
+a{color:var(--blue)}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.hero{padding:3.5rem 0 .5rem}
+.lead{font-size:1.2rem;margin-top:1.1rem}
+mark{background:var(--mark);color:var(--ink);padding:0 .15em;border-radius:3px}
+nav.jump{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.4rem}
+nav.jump a{padding:.4rem .8rem;border:1px solid var(--line);border-radius:6px;text-decoration:none;color:var(--ink);background:var(--surface);font-size:.95rem}
+nav.jump a:hover{border-color:var(--blue)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface);margin:1rem 0}
+.seg button{font:500 .98rem var(--body);padding:.6rem 1.1rem;border:0;background:transparent;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"],.seg button[aria-selected="true"]{background:var(--blue);color:#fff}
+:root[data-theme="dark"] .seg button[aria-pressed="true"],:root[data-theme="dark"] .seg button[aria-selected="true"]{color:#0F1526}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .seg button[aria-pressed="true"],:root:not([data-theme="light"]) .seg button[aria-selected="true"]{color:#0F1526}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1.25rem 1.3rem}
+.prompt{font-family:var(--mono);font-size:.92rem;background:var(--blue-soft);border-radius:6px;padding:.55rem .8rem;display:inline-block;margin:0 0 .9rem}
+.steps{list-style:none;margin:0;padding:0}
+.steps li{padding:.55rem 0 .55rem 1.6rem;position:relative;border-top:1px solid var(--line)}
+.steps li:first-child{border-top:0}
+.steps li::before{content:"";position:absolute;left:.2rem;top:1.05rem;width:.55rem;height:.55rem;border-radius:50%;background:var(--c,var(--blue))}
+.outcome{margin-top:.9rem;padding:.7rem .9rem;border-radius:6px;font-weight:500}
+.bad .outcome{background:var(--warn-soft);color:var(--warn)}
+.good .outcome{background:var(--blue-soft);color:var(--ink)}
+.bad{--c:var(--warn)}
+.good{--c:var(--ok)}
+.tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin:1rem 0 .8rem}
+.tabs button{font:500 .98rem var(--body);padding:.55rem .9rem;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+:root[data-theme="dark"] .tabs button[aria-selected="true"]{color:#0F1526}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tabs button[aria-selected="true"]{color:#0F1526}}
+.q{font-family:var(--head);font-weight:600;font-size:1.25rem;margin:0 0 .3rem}
+.cols{display:grid;gap:1rem;grid-template-columns:1fr;margin-top:1rem}
+@media(min-width:720px){.cols.two{grid-template-columns:1fr 1fr}}
+pre{margin:.6rem 0 0;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:.9rem 1rem;overflow-x:auto;font:400 .84rem/1.6 var(--mono);white-space:pre}
+.file{font:500 .82rem var(--mono);color:var(--muted)}
+.note{border-left:4px solid var(--mark);padding:.4rem 0 .4rem .9rem;margin-top:1rem;max-width:62ch}
+/* demo: the memorable piece */
+.demo{display:grid;gap:1rem;margin-top:1rem}
+@media(min-width:720px){.demo{grid-template-columns:.9fr 1.1fr}}
+.doc{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.2rem 1.1rem 2.4rem;position:relative;
+  background-image:linear-gradient(to right,transparent 1.6rem,var(--mark) 1.6rem,var(--mark) calc(1.6rem + 2px),transparent calc(1.6rem + 2px))}
+.doc h3{margin-bottom:.4rem}
+.doc label{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem 0;cursor:pointer}
+.doc input{margin-top:.38rem;accent-color:var(--blue);width:1.05rem;height:1.05rem;flex:none}
+.out h4{font:600 .98rem var(--head);margin:0 0 .35rem}
+.out ul{margin:0 0 1rem;padding:0;list-style:none}
+.out li{padding:.35rem .6rem;border-radius:6px;background:var(--bg);margin-bottom:.35rem;font-size:.95rem;animation:pop .25s ease-out}
+.out li.t::before{content:"☐ ";color:var(--muted)}
+.out li.c::before{content:"✓ ";color:var(--ok);font-weight:700}
+.warnbox{background:var(--warn-soft);color:var(--warn);border-radius:6px;padding:.6rem .8rem;margin-bottom:.8rem;font-weight:500;font-size:.95rem}
+.empty{color:var(--muted);font-style:italic}
+.count{font-weight:600;margin-bottom:.8rem}
+@keyframes pop{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:.2rem 1.1rem;margin-bottom:.6rem}
+summary{cursor:pointer;font-weight:600;padding:.8rem 0}
+details .pair{display:grid;gap:.6rem;padding-bottom:1rem}
+@media(min-width:720px){details .pair{grid-template-columns:1fr 1fr}}
+.pair div{padding:.7rem .85rem;border-radius:6px;font-size:.96rem}
+.pair .weak{background:var(--warn-soft);color:var(--warn)}
+.pair .strong{background:var(--blue-soft)}
+.pair b{display:block;margin-bottom:.2rem}
+ul.plain{padding-left:1.2rem;margin:.4rem 0}
+ul.plain li{margin:.35rem 0}
+.tool{padding:.7rem 0;border-top:1px solid var(--line)}
+.tool:first-of-type{border-top:0}
+code{font:400 .88em var(--mono);background:var(--blue-soft);padding:.05em .35em;border-radius:4px}
+footer{margin-top:3rem;color:var(--muted);font-size:.95rem;border-top:1px solid var(--line);padding-top:1rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header class="hero">
+  <h1>Write down what you want to build before asking the AI to build it</h1>
+  <p class="lead"><strong>Spec-Driven Development (SDD)</strong> is a way of developing in which <mark>the specification is the source of truth</mark>. You describe the expected behavior precisely; the plan, the tasks and the code come from it and are checked against it.</p>
+  <nav class="jump" aria-label="Sections">
+    <a href="#problema">The problem</a><a href="#ciclo">The cycle</a><a href="#demo">Try it</a><a href="#spec">A good spec</a><a href="#usar">When to use it</a>
+  </nav>
+</header>
+
+<section id="problema">
+  <h2>What problem it solves</h2>
+  <p>With AI assistants it is very easy to ask for code and very hard to know whether it is the right code. Compare what happens with the same request.</p>
+  <div class="seg" role="group" aria-label="Way of working">
+    <button id="b-vibe" aria-pressed="true">Without a specification</button>
+    <button id="b-sdd" aria-pressed="false">With a specification</button>
+  </div>
+  <div class="panel" id="cmp" aria-live="polite"></div>
+</section>
+
+<section id="ciclo">
+  <h2>The SDD cycle</h2>
+  <p>Four phases. Each one produces a document that the next one takes as input, and you review it before moving on.</p>
+  <div class="tabs" role="tablist" aria-label="Phases">
+    <button role="tab" id="tab0" aria-selected="true" aria-controls="phase">1. Specify</button>
+    <button role="tab" id="tab1" aria-selected="false" aria-controls="phase">2. Plan</button>
+    <button role="tab" id="tab2" aria-selected="false" aria-controls="phase">3. Break into tasks</button>
+    <button role="tab" id="tab3" aria-selected="false" aria-controls="phase">4. Implement</button>
+  </div>
+  <div class="panel" id="phase" role="tabpanel" aria-live="polite"></div>
+  <p class="note"><strong>The golden rule:</strong> if the result is not what you wanted, fix the specification or the plan first and regenerate. Patching only the code makes the document and the program drift apart.</p>
+</section>
+
+<section id="demo">
+  <h2>Change the spec and see what changes</h2>
+  <p>Check the requirements of a task API. On the right you see the acceptance criteria and the tasks that come out of them.</p>
+  <div class="demo">
+    <div class="doc">
+      <h3>spec.md: To-do list</h3>
+      <div id="reqs"></div>
+    </div>
+    <div class="out panel" id="out" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="spec">
+  <h2>What makes a specification good</h2>
+  <p>Open each principle to see a weak version and a good one.</p>
+  <details>
+    <summary>It says what and why, not how</summary>
+    <div class="pair">
+      <div class="weak"><b>Weak</b>Use an <code>@Scheduled</code> every hour to delete tasks.</div>
+      <div class="strong"><b>Good</b>Tasks completed more than 30 days ago are deleted automatically so the list does not grow out of control.</div>
+    </div>
+  </details>
+  <details>
+    <summary>The criteria can be checked</summary>
+    <div class="pair">
+      <div class="weak"><b>Weak</b>It has to be fast.</div>
+      <div class="strong"><b>Good</b>Listing 1,000 tasks responds in under 300 ms in 95% of requests.</div>
+    </div>
+  </details>
+  <details>
+    <summary>It flags what you do not know</summary>
+    <div class="pair">
+      <div class="weak"><b>Weak</b>Manage users. (The AI silently decides how.)</div>
+      <div class="strong"><b>Good</b>Manage users. <code>[NEEDS CLARIFICATION: own sign-up or login with Google?]</code></div>
+    </div>
+  </details>
+</section>
+
+<section id="usar">
+  <h2>When to use it and with which tools</h2>
+  <div class="cols two">
+    <div class="panel">
+      <h3>It is worth it if</h3>
+      <ul class="plain"><li>The project has several features that touch each other.</li><li>You are going to work with other people or with several AI sessions.</li><li>The cost of getting it wrong is high (data, payments, security).</li><li>You want to be able to change technology without losing the what.</li></ul>
+    </div>
+    <div class="panel">
+      <h3>Better without it if</h3>
+      <ul class="plain"><li>It is a throwaway script or a prototype for exploring.</li><li>The task fits in a small, clear change.</li><li>You do not know yet what you want: explore first and specify later.</li></ul>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:1rem">
+    <h3>Tools that apply it</h3>
+    <div class="tool"><strong>GitHub Spec Kit</strong>: commands such as <code>/specify</code>, <code>/plan</code>, <code>/tasks</code> and <code>/implement</code>, and a <code>/constitution</code> to set the project's principles.</div>
+    <div class="tool"><strong>Kiro</strong>: an IDE that generates <code>requirements.md</code>, <code>design.md</code> and <code>tasks.md</code> for each feature.</div>
+    <div class="tool"><strong>OpenSpec and Tessl</strong>: other approaches that keep the specs inside the repository alongside the code.</div>
+    <div class="tool"><strong>Without a tool</strong>: three markdown files (spec, plan, tasks) and your favorite assistant are already SDD.</div>
+  </div>
+  <footer>SDD is a young approach: the names of commands and tools change quickly, but the cycle of specifying, planning, breaking down and implementing stays the same.</footer>
+</section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+
+/* 1. comparison */
+const CMP={
+  vibe:{cls:"bad",items:["You write a short prompt and the AI fills in the gaps with assumptions.","It works in the demo, but it is not exactly what you had in mind.","You correct it with more prompts and the context gets lost along the way.","The code and the intent drift apart: nobody knows what is correct."],out:"Result: lots of rework and code nobody dares to touch."},
+  sdd:{cls:"good",items:["You write what the system must do and why, with testable criteria.","Ambiguities are resolved before a single line of code is written.","The AI implements task by task and you review each small change.","You check the result against the criteria; if something changes, you edit the spec."],out:"Result: fewer surprises and a document that explains the why behind the code."}
+};
+function showCmp(k){
+  const d=CMP[k],box=$("#cmp");box.className="panel "+d.cls;box.innerHTML="";
+  box.append(el("div","prompt",'Initial prompt: "Make me a to-do app"'));
+  const ul=el("ul","steps");d.items.forEach(i=>ul.append(el("li",null,i)));
+  box.append(ul,el("div","outcome",d.out));
+  $("#b-vibe").setAttribute("aria-pressed",k==="vibe");$("#b-sdd").setAttribute("aria-pressed",k==="sdd");
+}
+$("#b-vibe").onclick=()=>showCmp("vibe");$("#b-sdd").onclick=()=>showCmp("sdd");showCmp("vibe");
+
+/* 2. phases */
+const PH=[
+ {q:"What do users need and why?",who:"You write it (the AI can help you draft it and ask you questions). No technology yet.",file:"spec.md",code:"# To-do list\n\n## User story\nAs a user I want to mark a task as\ncompleted to see my progress.\n\n## Acceptance criteria\n- Given a pending task, when I mark it,\n  it shows as completed with its date.\n- [NEEDS CLARIFICATION] Can it be unmarked?"},
+ {q:"How do we build it and why this way?",who:"You make the technical decisions, with the AI proposing options. Every decision is justified.",file:"plan.md",code:"## Stack\nSpring Boot 3 + PostgreSQL\n\n## Model\nTask(id, title, status, completedAt)\n\n## API\nPATCH /tasks/{id}/complete -> 200 | 404\n\n## Decision\nstatus as an enum and not as a boolean, because\nthe spec anticipates more states in the future."},
+ {q:"In what small, ordered steps?",who:"The AI breaks down the plan; you check that each task is small, verifiable and covers a criterion.",file:"tasks.md",code:"- [ ] T1 Migration: tasks table\n- [ ] T2 Test: marking as completed saves the date\n- [ ] T3 Endpoint PATCH /tasks/{id}/complete\n- [ ] T4 Test: nonexistent id returns 404\n\nT2 and T4 are independent and can be\ndone in parallel."},
+ {q:"Does the code meet what was specified?",who:"The AI writes the code task by task. You review the changes and run the tests that come from the criteria.",file:"Result",code:"T1 done  migration applied\nT2 done  test red -> green after T3\nT3 done  endpoint implemented\nT4 done  404 covered\n\nCriteria met: 2 of 2\nPending decision: unmarking (spec)."}
+];
+const tabs=[...document.querySelectorAll(".tabs button")];
+function showPh(i){
+  tabs.forEach((b,j)=>b.setAttribute("aria-selected",i===j));
+  const p=PH[i],box=$("#phase");box.setAttribute("aria-labelledby","tab"+i);box.innerHTML="";
+  box.append(el("p","q",p.q),el("p",null,p.who),el("div","file",p.file));
+  box.append(Object.assign(el("pre"),{textContent:p.code}));
+}
+tabs.forEach((b,i)=>{b.onclick=()=>showPh(i);b.onkeydown=e=>{
+  if(e.key==="ArrowRight"||e.key==="ArrowLeft"){const n=(i+(e.key==="ArrowRight"?1:3))%4;tabs[n].focus();showPh(n)}}});
+showPh(0);
+
+/* 3. demo */
+const REQ=[
+ {id:"crear",t:"Create a task with a title",c:["Given a non-empty title, a pending task is created.","An empty title returns a 400 error."],k:["tasks table and Task entity","Endpoint POST /tasks","Title validation tests"]},
+ {id:"completar",t:"Mark a task as completed",c:["When it is completed, the date is saved.","A nonexistent task returns 404."],k:["completedAt field","Endpoint PATCH /tasks/{id}/complete","404 test"],needs:["crear"]},
+ {id:"filtrar",t:"Filter tasks by status",c:["GET /tasks?status=done only returns completed tasks."],k:["status parameter in the listing","Query filtered by status"],needs:["crear","completar"]},
+ {id:"auth",t:"Each user sees only their own tasks",c:["A user cannot read or change other users' tasks.","Without a session, the API returns 401."],k:["Authentication and user in Task","Owner filter in every query","Cross-access tests"],needs:["crear"]}
+];
+const sel=new Set(["crear"]);
+const reqs=$("#reqs");
+REQ.forEach(r=>{
+  const l=el("label"),i=el("input");i.type="checkbox";i.checked=sel.has(r.id);
+  i.onchange=()=>{i.checked?sel.add(r.id):sel.delete(r.id);render()};
+  l.append(i,el("span",null,r.t));reqs.append(l);
+});
+function render(){
+  const o=$("#out");o.innerHTML="";
+  const on=REQ.filter(r=>sel.has(r.id));
+  if(!on.length){o.append(el("p","empty","Check at least one requirement to generate criteria and tasks."));return}
+  const miss=[];on.forEach(r=>(r.needs||[]).forEach(n=>{if(!sel.has(n)){const nn=REQ.find(x=>x.id===n).t;if(!miss.some(m=>m.n===nn))miss.push({n:nn,by:r.t})}}));
+  miss.forEach(m=>o.append(el("div","warnbox",`Gap detected: "${m.by}" depends on "${m.n}", which is not in the spec. Add it before implementing.`)));
+  const C=on.flatMap(r=>r.c),K=on.flatMap(r=>r.k);
+  o.append(el("div","count",`${C.length} criteria and ${K.length} tasks`));
+  o.append(el("h4",null,"Acceptance criteria"));
+  const u1=el("ul");C.forEach(x=>u1.append(el("li","c",x)));o.append(u1);
+  o.append(el("h4",null,"Tasks"));
+  const u2=el("ul");K.forEach(x=>u2.append(el("li","t",x)));o.append(u2);
+}
+render();
+</script>
+</body>
+</html>
